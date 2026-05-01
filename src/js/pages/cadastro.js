@@ -1,20 +1,19 @@
 import { register } from "../services/authService.js";
 
 const form = document.getElementById("register-form");
-const errorMessage = document.getElementById("error-message");
 
 form.addEventListener("submit", async (e) => {
   e.preventDefault();
 
+  const nome = document.getElementById("nome").value;
   const email = document.getElementById("email").value;
   const password = document.getElementById("password").value;
 
-  const { data, error } = await register(email, password);
+  const { error } = await register(email, password, nome);
 
   if (error) {
-    errorMessage.textContent = error.message;
+    alert(error.message);
   } else {
-    alert("Conta criada com sucesso!");
-    window.location.href = "login.html";
+    window.location.href = "autenticar.html";
   }
 });

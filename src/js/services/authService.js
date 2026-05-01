@@ -9,11 +9,33 @@ export async function login(email, password) {
 }
 
 // CADASTRO
-export async function register(email, password) {
-  return await supabase.auth.signUp({
+export async function register(email, password, nome) {
+  const { data, error } = await supabase.auth.signUp({
     email,
-    password,
+    password
   });
+
+  if (error) return { error };
+
+  const user = data.user;
+
+  // cria perfil no BD
+  const { error: profileError } = await supabase
+    .from("profiles")
+    .insert([
+      {
+        id: user.id,
+        nome: nome,
+        pegada_total: 0
+      }
+    ]);
+
+  if (profileError) {
+    console.error(profileError);
+    return { error: profileError };
+  }
+
+  return { data };
 }
 
 // USUÁRIO ATUAL
