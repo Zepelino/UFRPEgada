@@ -1,37 +1,44 @@
 <html lan="pt-BR">
-  <head>
-    <meta charset="UTF-8" />
-    <title>Sign Up | UFRPEgada</title>
 
-    <link rel="stylesheet" href="src/css/global.css" />
-    <link rel="stylesheet" href="src/css/login.css" />
-  </head>
-  <body>
-    <form id="register-form">
+<head>
+  <meta charset="UTF-8" />
+  <title>Sign Up | UFRPEgada</title>
+  <link rel="icon" href="src/assets/imagens/UFRPEgada_LOGO.png" type="image/png">
+  <link rel="stylesheet" href="src/css/global.css" />
+  <link rel="stylesheet" href="src/css/login.css" />
+</head>
 
-      <div class="input-group">
-        <label>Nome</label>
-        <input type="text" id="nome" required />
-      </div>
+<body>
+  <div class="login-container">
+    <div class="login-card">
+      <h1>UFRPEgada</h1>
+      <p class="subtitle">Crie sua conta</p>
 
-      <div class="input-group">
-        <label>Email</label>
-        <input type="email" id="email" required />
-      </div>
+      <form id="register-form">
+        <div class="input-group">
+          <label>Nome</label>
+          <input type="text" id="nome" required />
+        </div>
 
-      <div class="input-group">
-        <label>Senha</label>
-        <input type="password" id="password" required />
-      </div>
+        <div class="input-group">
+          <label>Email</label>
+          <input type="email" id="email" required />
+        </div>
 
-      <button type="submit">Cadastrar</button>
+        <div class="input-group">
+          <label>Senha</label>
+          <input type="password" id="password" required />
+        </div>
 
-      <p id="error-message"></p>
-    </form>
+        <button type="submit">Cadastrar</button>
 
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <script type="module" src="src/js/pages/cadastro.js"></script>
-  </body>
+        <p id="error-message"></p>
+      </form>
+
+      <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+      <script type="module" src="src/js/pages/cadastro.js"></script>
+</body>
+
 </html>
 
 <!--

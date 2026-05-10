@@ -3,14 +3,14 @@
 body {
   margin: 0;
   font-family: Arial, sans-serif;
-  background-color: #f4f7f5;
+  background-color: #f4f7eb;
   color: #333;
 }
 
 /* ===== HEADER ===== */
 
 .topbar {
-  background-color: #2e7d32;
+  background-color: #366e2a;
   color: white;
 
   display: flex;
@@ -45,7 +45,7 @@ body {
 
 #logout-btn {
   background-color: white;
-  color: #2e7d32;
+  color: #1f4325;
 
   border: none;
   border-radius: 8px;
@@ -103,7 +103,7 @@ body {
 
   border-radius: 50%;
 
-  background-color: #2e7d32;
+  background-color: #366e2a;
   color: white;
 
   display: flex;
@@ -136,7 +136,7 @@ body {
 .info-card {
   background-color: #f8faf8;
 
-  border-left: 6px solid #2e7d32;
+  border-left: 6px solid #366e2a;
 
   padding: 20px;
 
@@ -145,7 +145,7 @@ body {
 
 .info-card h3 {
   margin-top: 0;
-  color: #2e7d32;
+  color: #366e2a;
 }
 
 .info-card p {
