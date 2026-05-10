@@ -14,6 +14,6 @@ form.addEventListener("submit", async (e) => {
   if (error) {
     errorMessage.textContent = error.message;
   } else {
-    window.location.href = "dashboard.html";
+    window.location.href = "usuario.html";
   }
 });
