@@ -1,0 +1,108 @@
+<!doctype html>
+<html lang="pt-BR">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+    <title>Atividades | UFRPEgada</title>
+
+    <link rel="icon" href="src/assets/imagens/UFRPEgada_LOGO.png" type="image/png">
+
+    <link rel="stylesheet" href="src/css/global.css" />
+    <link rel="stylesheet" href="src/css/atividades.css" />
+</head>
+
+<body>
+
+    <header class="topbar">
+        <h1>UFRPEgada</h1>
+
+        <nav>
+            <a href="usuario.html">Meu Perfil</a>
+            <button id="logout-btn">Sair</button>
+        </nav>
+    </header>
+
+    <main class="activities-container">
+
+        <section class="activity-form-card">
+
+            <h2>Registrar Atividade</h2>
+
+            <form id="meu-formulario-atividades">
+
+                <div class="input-group">
+                    <label for="select-atividade">
+                        Atividade
+                    </label>
+
+                    <select id="select-atividade" required>
+                        <option value="" disabled selected>
+                            Selecione uma atividade
+                        </option>
+
+                        <option value="1">
+                            Ar-condicionado
+                        </option>
+
+                        <option value="2">
+                            Uso de Desktop
+                        </option>
+
+                        <option value="3">
+                            Banho Quente
+                        </option>
+                    </select>
+                </div>
+
+                <div class="input-group">
+
+                    <label for="input-tempo">
+                        Tempo de uso (horas)
+                    </label>
+
+                    <input
+                        type="number"
+                        id="input-tempo"
+                        step="0.1"
+                        min="0.1"
+                        placeholder="Ex: 1.5"
+                        required
+                    />
+                </div>
+
+                <button type="submit" class="register-btn">
+                    Registrar Atividade
+                </button>
+
+            </form>
+
+        </section>
+
+        <section class="history-card">
+
+            <h2>Histórico de Atividades</h2>
+
+            <div class="activity-history-item">
+                <span>🚿 Banho Quente</span>
+                <span>1h</span>
+            </div>
+
+            <div class="activity-history-item">
+                <span>🖥️ Uso de Desktop</span>
+                <span>3h</span>
+            </div>
+
+            <div class="activity-history-item">
+                <span>❄️ Ar-condicionado</span>
+                <span>2h</span>
+            </div>
+
+        </section>
+
+    </main>
+
+</body>
+
+</html>

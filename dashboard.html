@@ -1,63 +1,87 @@
-<!DOCTYPE html>
+<!-- dashboard.html -->
+
+<!doctype html>
 <html lang="pt-br">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dashboard - UFRPEGADA</title>
-    <link rel="stylesheet" href="./css/global.css">
-    <link rel="stylesheet" href="./css/dashboard.css">
+
+    <title>Dashboard | UFRPEGADA</title>
+    <link rel="icon" href="src/assets/imagens/UFRPEgada_LOGO.png" type="image/png">
+    <link rel="stylesheet" href="src/css/global.css" />
+    <link rel="stylesheet" href="src/css/dashboard.css" />
 </head>
+
 <body>
-    <header>
-        <img src="./assets/imagens/UFRPegada_LOGO.png" alt="Logo UFRPEGADA" width="120">
+    <header class="topbar">
+        <h1>UFRPEgada</h1>
+
         <nav>
             <a href="usuario.html">Meu Perfil</a>
-            <a href="index.html">Sair</a>
+            <button id="logout-btn">Sair</button>
         </nav>
     </header>
 
-    <main class="container">
-        <!-- EXIBIÇÃO DO CÁLCULO (REQ4) -->
-        <section class="card-emissao">
-            <h2>Sua Pegada de Carbono Atual</h2>
-            <div class="display-valor">
-                <span id="valor-emissao-total">0.00 kg CO2</span>
-            </div>
-        </section>
+ <main class="dashboard-container">
 
-        <!-- FORMULÁRIO DE REGISTRO (REQ4) -->
-        <section class="card-registro">
-            <h3>Registrar Atividade Diária</h3>
-            <form id="meu-formulario-atividades">
-                <div class="input-group">
-                    <label for="select-atividade">O que você fez?</label>
-                    <select id="select-atividade" required>
-                        <option value="" disabled selected>Selecione uma atividade</option>
-                        <!-- UUIDs extraídos do seu banco de dados -->
-                        <option value="2cd9074c-bf8d-488a-a2d0-939657522612">Ar-condicionado</option>
-                        <option value="50a8b863-05ce-4a7f-be7f-a47c61cfe3fd">Uso de Desktop</option>
-                        <option value="bf36caa8-267f-483f-a477-375e4f1f2f61">Banho Quente</option>
-                    </select>
-                </div>
+    <section class="stats-grid">
 
-                <div class="input-group">
-                    <label for="input-tempo">Por quanto tempo? (em horas)</label>
-                    <input type="number" id="input-tempo" step="0.1" min="0.1" placeholder="Ex: 1.5" required>
-                </div>
+        <div class="stat-card">
+            <h3>Pegada Atual</h3>
 
-                <button type="submit" class="btn-registrar">Registrar no Banco</button>
-            </form>
-        </section>
-    </main>
+            <p class="stat-value" id="valor-emissao-total">
+                0.00 kg CO₂
+            </p>
+        </div>
 
-    <!-- SCRIPTS NA ORDEM DE DEPENDÊNCIA -->
-    <!-- 1. SDK do Supabase para o window.supabase funcionar -->
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    
-    <!-- 2. Seu arquivo de inicialização do cliente -->
-    <script type="module" src="./js/services/supabaseClient.js"></script>
-    
-    <!-- 3. A lógica da página dashboard -->
-    <script type="module" src="./js/pages/dashboard.js"></script>
+        <div class="stat-card">
+            <h3>Pontuação Verde</h3>
+
+            <p class="stat-value">
+                120 pts
+            </p>
+        </div>
+
+        <div class="stat-card">
+            <h3>Nível Sustentável</h3>
+
+            <p class="stat-value">
+                Eco Iniciante
+            </p>
+        </div>
+
+        <div class="stat-card">
+            <h3>Atividades</h3>
+
+            <p class="stat-value">
+                14
+            </p>
+        </div>
+
+    </section>
+
+    <section class="recent-activities">
+
+        <h2>Últimas Atividades</h2>
+
+        <div class="activity-item">
+            <span>🚿 Banho Quente</span>
+            <span>1h</span>
+        </div>
+
+        <div class="activity-item">
+            <span>🖥️ Uso de Desktop</span>
+            <span>3h</span>
+        </div>
+
+        <div class="activity-item">
+            <span>❄️ Ar-condicionado</span>
+            <span>2h</span>
+        </div>
+
+    </section>
+
+</main>
+
 </body>
-</html>

@@ -64,8 +64,9 @@ body {
 
 /* ===== DASHBOARD CONTAINER ===== */
 
-.dashboard-container {
-  max-width: 1200px;
+.activities-container {
+  max-width: 1000px;
+
   margin: 40px auto;
   padding: 20px;
 
@@ -74,40 +75,77 @@ body {
   gap: 24px;
 }
 
-.stats-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-  gap: 20px;
-}
-
-.stat-card,
-.recent-activities {
+.activity-form-card,
+.history-card {
   background: white;
 
   border-radius: 20px;
 
-  padding: 28px;
+  padding: 32px;
 
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
 }
 
-.stat-card h3 {
+.activity-form-card h2,
+.history-card h2 {
+  margin-bottom: 24px;
   color: #1b4332;
-  margin-bottom: 16px;
 }
 
-.stat-value {
-  font-size: 2rem;
+#meu-formulario-atividades {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.input-group {
+  display: flex;
+  flex-direction: column;
+}
+
+.input-group label {
+  margin-bottom: 8px;
+  font-weight: 600;
+}
+
+.input-group input,
+.input-group select {
+  width: 100%;
+
+  padding: 14px;
+
+  border-radius: 12px;
+  border: 1px solid #dcdcdc;
+
+  background: #f9f9f9;
+
+  font-size: 1rem;
+}
+
+.register-btn {
+  width: 100%;
+
+  padding: 16px;
+
+  border: none;
+  border-radius: 14px;
+
+  background: #2d6a4f;
+  color: white;
+
+  font-size: 1rem;
   font-weight: bold;
-  color: #2d6a4f;
+
+  cursor: pointer;
+
+  transition: 0.2s ease;
 }
 
-.recent-activities h2 {
-  margin-bottom: 20px;
-  color: #1b4332;
+.register-btn:hover {
+  background: #1b4332;
 }
 
-.activity-item {
+.activity-history-item {
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -117,6 +155,6 @@ body {
   border-bottom: 1px solid #ececec;
 }
 
-.activity-item:last-child {
+.activity-history-item:last-child {
   border-bottom: none;
 }
