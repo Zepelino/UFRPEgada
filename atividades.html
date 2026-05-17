@@ -1,108 +1,87 @@
 <!doctype html>
 <html lang="pt-BR">
-
-<head>
+  <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
     <title>Atividades | UFRPEgada</title>
 
-    <link rel="icon" href="src/assets/imagens/UFRPEgada_LOGO.png" type="image/png">
+    <link
+      rel="icon"
+      href="src/assets/imagens/UFRPEgada_LOGO.png"
+      type="image/png"
+    />
 
     <link rel="stylesheet" href="src/css/global.css" />
     <link rel="stylesheet" href="src/css/atividades.css" />
-</head>
+  </head>
 
-<body>
-
+  <body>
     <header class="topbar">
-        <h1>UFRPEgada</h1>
+      <h1>UFRPEgada</h1>
 
-        <nav>
-            <a href="usuario.html">Meu Perfil</a>
-            <button id="logout-btn">Sair</button>
-        </nav>
+      <nav>
+        <a href="usuario.html">Meu Perfil</a>
+        <button id="logout-btn">Sair</button>
+      </nav>
     </header>
 
     <main class="activities-container">
+      <section class="activity-form-card">
+        <h2>Registrar Atividade</h2>
 
-        <section class="activity-form-card">
+        <form id="meu-formulario-atividades">
+          <div class="input-group">
+            <label for="select-atividade"> Atividade </label>
 
-            <h2>Registrar Atividade</h2>
+            <select id="select-atividade" required>
+              <option value="" disabled selected>
+                Selecione uma atividade
+              </option>
 
-            <form id="meu-formulario-atividades">
+              <option value="2cd9074c-bf8d-488a-a2d0-939657522612">
+                Ar-condicionado
+              </option>
 
-                <div class="input-group">
-                    <label for="select-atividade">
-                        Atividade
-                    </label>
+              <option value="50a8b863-05ce-4a7f-be7f-a47c61cfe3fd">
+                Uso de Desktop
+              </option>
 
-                    <select id="select-atividade" required>
-                        <option value="" disabled selected>
-                            Selecione uma atividade
-                        </option>
+              <option value="bf36caa8-267f-483f-a477-375e4f1f2f61">
+                Banho Quente
+              </option>
+            </select>
+          </div>
 
-                        <option value="1">
-                            Ar-condicionado
-                        </option>
+          <div class="input-group">
+            <label for="input-tempo"> Tempo de uso (horas) </label>
 
-                        <option value="2">
-                            Uso de Desktop
-                        </option>
+            <input
+              type="number"
+              id="input-tempo"
+              step="0.1"
+              min="0.1"
+              placeholder="Ex: 1.5"
+              required
+            />
+          </div>
 
-                        <option value="3">
-                            Banho Quente
-                        </option>
-                    </select>
-                </div>
+          <button type="submit" class="register-btn">
+            Registrar Atividade
+          </button>
+        </form>
+      </section>
 
-                <div class="input-group">
+      <section class="history-card">
+        <h2>Histórico de Atividades</h2>
 
-                    <label for="input-tempo">
-                        Tempo de uso (horas)
-                    </label>
+        <div id="activity-container"></div>
 
-                    <input
-                        type="number"
-                        id="input-tempo"
-                        step="0.1"
-                        min="0.1"
-                        placeholder="Ex: 1.5"
-                        required
-                    />
-                </div>
-
-                <button type="submit" class="register-btn">
-                    Registrar Atividade
-                </button>
-
-            </form>
-
-        </section>
-
-        <section class="history-card">
-
-            <h2>Histórico de Atividades</h2>
-
-            <div class="activity-history-item">
-                <span>🚿 Banho Quente</span>
-                <span>1h</span>
-            </div>
-
-            <div class="activity-history-item">
-                <span>🖥️ Uso de Desktop</span>
-                <span>3h</span>
-            </div>
-
-            <div class="activity-history-item">
-                <span>❄️ Ar-condicionado</span>
-                <span>2h</span>
-            </div>
-
-        </section>
-
+        <div id="empty-state" class="empty-state hidden">
+          <p>Nenhuma atividade registrada 🌱</p>
+        </div>
+      </section>
     </main>
-
-</body>
-
+    <script type="module" src="./src/js/modules/atividades.js"></script>
+  </body>
 </html>

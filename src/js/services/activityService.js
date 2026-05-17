@@ -1,43 +1,114 @@
-import { supabase } from './supabaseClient';
+import { supabase } from "./supabaseClient.js";
 
-/**
- * Calcula o consumo e registra a atividade no Supabase.
- * Pode ser chamado diretamente pelo formulário do Frontend.
- * * @param {string} userId - ID do usuário logado
- * @param {Object} atividadeSelecionada - Objeto da atividade vindo da tabela 'activities' (precisa ter id e consumo_por_hora)
- * @param {number} duracaoEmHoras - O tempo total informado pelo usuário na interface
- */
-export async function processarERegistrarAtividade(userId, atividadeSelecionada, duracaoEmHoras) {
-  try {
-    // 1. calcularConsumo() internamente
-    // Multiplica as horas informadas pelo valor padrão da atividade
-    const pegadaCalculada = duracaoEmHoras * atividadeSelecionada.consumo_por_hora;
+// ==========================
+// BUSCAR LOGS DO USUÁRIO
+// ==========================
 
-    // 2. Gerar os timestamps de inicio e fim baseados na duração
-    const dataFim = new Date(); // Considera o momento do registro como o fim da atividade
-    const dataInicio = new Date(dataFim.getTime() - (duracaoEmHoras * 60 * 60 * 1000)); // Subtrai as horas em milissegundos
+export async function getUserActivityLogs() {
+  // usuário atual
 
-    // 3. registrarAtividade() no Supabase
-    const { data, error } = await supabase
-      .from('activity_logs')
-      .insert([
-        {
-          user_id: userId,
-          activity_id: atividadeSelecionada.id,
-          inicio: dataInicio.toISOString(), // Formato exigido pelo timestamptz do BD
-          fim: dataFim.toISOString(),       // Formato exigido pelo timestamptz do BD
-          pegada_total: pegadaCalculada     // O valor numérico final do consumo
-        }
-      ])
-      .select();
+  const {
+    data: { user },
+    error: userError,
+  } = await supabase.auth.getUser();
 
-    if (error) throw error;
+  if (userError || !user) {
+    console.error("Usuário não autenticado");
 
-    console.log("Sucesso! O Log foi gerado sem quebrar a UI.", data);
-    return { sucesso: true, dados: data };
+    return [];
+  }
 
-  } catch (erro) {
-    console.error("Erro na comunicação com o banco:", erro.message);
-    return { sucesso: false, erro: erro.message };
+  // busca logs + atividade relacionada
+
+  const { data, error } = await supabase
+    .from("activity_logs")
+    .select(
+      `
+        *,
+        activities (
+          descricao,
+          consumo_por_hora
+        )
+      `,
+    )
+    .eq("user_id", user.id)
+    .order("inicio", {
+      ascending: false,
+    });
+
+  if (error) {
+    console.error(error);
+
+    return [];
+  }
+
+  // transforma os dados
+
+  return data.map((log) => {
+    const inicio = new Date(log.inicio);
+
+    const fim = new Date(log.fim);
+
+    // duração em horas
+
+    const duracao = (fim - inicio) / 1000 / 60 / 60;
+
+    // cálculo CO₂
+
+    const co2 = duracao * log.activities.consumo_por_hora;
+
+    return {
+      activity_name: log.activities.descricao,
+
+      duration: duracao.toFixed(1),
+
+      co2_saved: co2.toFixed(2),
+
+      date: inicio.toLocaleDateString("pt-BR"),
+    };
+  });
+}
+
+// ==========================
+// REGISTRAR NOVA ATIVIDADE
+// ==========================
+
+export async function registerActivity(activityId, duration) {
+  // usuário atual
+
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  if (!user) {
+    console.error("Usuário não autenticado");
+
+    return;
+  }
+
+  // horário atual
+
+  const inicio = new Date();
+
+  // calcula fim
+
+  const fim = new Date(inicio.getTime() + duration * 60 * 60 * 1000);
+
+  // salva log
+
+  const { error } = await supabase.from("activity_logs").insert([
+    {
+      user_id: user.id,
+
+      activity_id: activityId,
+
+      inicio: inicio.toISOString(),
+
+      fim: fim.toISOString(),
+    },
+  ]);
+
+  if (error) {
+    console.error(error);
   }
 }

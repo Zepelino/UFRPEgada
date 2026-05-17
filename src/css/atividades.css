@@ -158,3 +158,71 @@ body {
 .activity-history-item:last-child {
   border-bottom: none;
 }
+
+/* ===== CARDS DINÂMICOS ===== */
+
+#activity-container {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.activity-card {
+  background: #f8faf8;
+
+  border-left: 6px solid #2d6a4f;
+
+  border-radius: 14px;
+
+  padding: 18px;
+
+  transition: 0.2s;
+}
+
+.activity-card:hover {
+  transform: translateY(-2px);
+}
+
+.activity-header {
+  display: flex;
+
+  justify-content: space-between;
+
+  align-items: center;
+
+  margin-bottom: 10px;
+}
+
+.activity-title {
+  font-weight: bold;
+  font-size: 1.05rem;
+}
+
+.activity-duration {
+  font-weight: bold;
+  color: #2d6a4f;
+}
+
+.activity-info {
+  display: flex;
+
+  justify-content: space-between;
+
+  color: #666;
+
+  font-size: 0.95rem;
+}
+
+/* EMPTY STATE */
+
+.empty-state {
+  text-align: center;
+
+  padding: 30px;
+
+  color: #777;
+}
+
+.hidden {
+  display: none;
+}

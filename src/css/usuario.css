@@ -1,9 +1,12 @@
-/* usuario.css */
+/* ===== BODY ===== */
 
 body {
   margin: 0;
+
   font-family: Arial, sans-serif;
+
   background-color: #f4f7eb;
+
   color: #333;
 }
 
@@ -11,10 +14,13 @@ body {
 
 .topbar {
   background-color: #366e2a;
+
   color: white;
 
   display: flex;
+
   justify-content: space-between;
+
   align-items: center;
 
   padding: 15px 40px;
@@ -24,18 +30,21 @@ body {
 
 .topbar h1 {
   margin: 0;
-  font-size: 24px;
 }
 
 .topbar nav {
   display: flex;
+
   align-items: center;
+
   gap: 20px;
 }
 
 .topbar a {
   color: white;
+
   text-decoration: none;
+
   font-weight: bold;
 }
 
@@ -45,14 +54,17 @@ body {
 
 #logout-btn {
   background-color: white;
+
   color: #1f4325;
 
   border: none;
+
   border-radius: 8px;
 
   padding: 8px 16px;
 
   cursor: pointer;
+
   font-weight: bold;
 
   transition: 0.2s;
@@ -65,19 +77,23 @@ body {
 /* ===== CONTAINER ===== */
 
 .profile-container {
-  display: flex;
-  justify-content: center;
+  max-width: 1200px;
 
-  padding: 50px 20px;
+  margin: 0 auto;
+
+  padding: 40px 20px;
+
+  display: flex;
+
+  flex-direction: column;
+
+  gap: 30px;
 }
 
-/* ===== CARD PRINCIPAL ===== */
+/* ===== CARD PERFIL ===== */
 
 .profile-card {
   background-color: white;
-
-  width: 100%;
-  max-width: 900px;
 
   border-radius: 16px;
 
@@ -86,10 +102,11 @@ body {
   box-shadow: 0 8px 25px rgba(0, 0, 0, 0.08);
 }
 
-/* ===== CABEÇALHO PERFIL ===== */
+/* ===== HEADER PERFIL ===== */
 
 .profile-header {
   display: flex;
+
   align-items: center;
 
   gap: 20px;
@@ -98,19 +115,24 @@ body {
 }
 
 .avatar {
-  width: 80px;
-  height: 80px;
+  width: 90px;
+
+  height: 90px;
 
   border-radius: 50%;
 
   background-color: #366e2a;
+
   color: white;
 
   display: flex;
+
   justify-content: center;
+
   align-items: center;
 
-  font-size: 32px;
+  font-size: 36px;
+
   font-weight: bold;
 }
 
@@ -120,10 +142,11 @@ body {
 
 .profile-header p {
   margin-top: 5px;
+
   color: #777;
 }
 
-/* ===== CARDS DE INFO ===== */
+/* ===== INFO ===== */
 
 .profile-info {
   display: grid;
@@ -138,19 +161,113 @@ body {
 
   border-left: 6px solid #366e2a;
 
-  padding: 20px;
-
   border-radius: 12px;
+
+  padding: 20px;
 }
 
 .info-card h3 {
   margin-top: 0;
+
   color: #366e2a;
 }
 
 .info-card p {
   font-size: 24px;
+
   font-weight: bold;
 
   margin-bottom: 0;
+}
+
+/* ===== HISTÓRICO ===== */
+
+.activities-section {
+  background-color: white;
+
+  border-radius: 16px;
+
+  padding: 30px;
+
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.08);
+}
+
+.section-title {
+  margin-bottom: 25px;
+}
+
+.section-title h2 {
+  margin: 0;
+
+  color: #366e2a;
+}
+
+/* ===== CONTAINER DOS CARDS ===== */
+
+#activity-container {
+  display: flex;
+
+  flex-direction: column;
+
+  gap: 20px;
+}
+
+/* ===== CARD DE ATIVIDADE ===== */
+
+.activity-card {
+  background-color: #f8faf8;
+
+  border-left: 6px solid #4caf50;
+
+  border-radius: 12px;
+
+  padding: 20px;
+
+  transition: 0.2s;
+}
+
+.activity-card:hover {
+  transform: translateY(-2px);
+}
+
+.activity-card h3 {
+  margin-top: 0;
+
+  color: #2e7d32;
+}
+
+.activity-card p {
+  margin: 8px 0;
+}
+
+/* ===== EMPTY STATE ===== */
+
+.empty-state {
+  text-align: center;
+
+  padding: 40px;
+
+  color: #777;
+}
+
+.hidden {
+  display: none;
+}
+
+/* ===== RESPONSIVO ===== */
+
+@media (max-width: 768px) {
+  .topbar {
+    flex-direction: column;
+
+    gap: 15px;
+
+    text-align: center;
+  }
+
+  .profile-header {
+    flex-direction: column;
+
+    text-align: center;
+  }
 }

@@ -1,5 +1,3 @@
-<!-- usuario.html -->
-
 <!doctype html>
 <html lang="pt-BR">
   <head>
@@ -7,52 +5,91 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
     <title>Usuário | UFRPEgada</title>
-    <link rel="icon" href="src/assets/imagens/UFRPEgada_LOGO.png" type="image/png">
+
+    <link
+      rel="icon"
+      href="src/assets/imagens/UFRPEgada_LOGO.png"
+      type="image/png"
+    />
+
     <link rel="stylesheet" href="src/css/global.css" />
     <link rel="stylesheet" href="src/css/usuario.css" />
   </head>
 
   <body>
+    <!-- ===== HEADER ===== -->
+
     <header class="topbar">
       <h1>UFRPEgada</h1>
 
       <nav>
         <a href="dashboard.html">Dashboard</a>
         <a href="atividades.html">Atividades</a>
+
         <button id="logout-btn">Sair</button>
       </nav>
     </header>
 
+    <!-- ===== MAIN ===== -->
+
     <main class="profile-container">
+      <!-- ===== PERFIL ===== -->
+
       <section class="profile-card">
         <div class="profile-header">
-          <div class="avatar">J</div>
+          <div class="avatar" id="user-avatar">J</div>
 
           <div>
-            <h2 id="user-name">Júlio</h2>
-            <p id="user-email">julio@email.com</p>
+            <h2 id="user-name">Carregando...</h2>
+
+            <p id="user-email">Carregando...</p>
           </div>
         </div>
+
+        <!-- ===== INFO ===== -->
 
         <div class="profile-info">
           <div class="info-card">
             <h3>Pontuação Verde</h3>
-            <p id="user-score">120 pts</p>
+
+            <p id="user-score">0 pts</p>
           </div>
 
           <div class="info-card">
             <h3>Atividades Registradas</h3>
-            <p id="user-activities">14</p>
+
+            <p id="user-activities">0</p>
           </div>
 
           <div class="info-card">
             <h3>Nível Sustentável</h3>
+
             <p id="user-level">Eco Iniciante</p>
           </div>
         </div>
       </section>
+
+      <!-- ===== HISTÓRICO ===== -->
+
+      <section class="activities-section">
+        <div class="section-title">
+          <h2>Histórico de Atividades</h2>
+        </div>
+
+        <!-- cards serão renderizados aqui -->
+
+        <div id="activity-container">
+          <!-- cards dinâmicos -->
+        </div>
+
+        <!-- estado vazio -->
+
+        <div id="empty-state" class="empty-state hidden">
+          <p>Nenhuma atividade registrada ainda 🌱</p>
+        </div>
+      </section>
     </main>
 
-    <script type="module" src="src/js/pages/usuario.js"></script>
+    <script type="module" src="./src/js/modules/usuario.js"></script>
   </body>
 </html>

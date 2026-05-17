@@ -12,7 +12,7 @@ export async function login(email, password) {
 export async function register(email, password, nome) {
   const { data, error } = await supabase.auth.signUp({
     email,
-    password
+    password,
   });
 
   if (error) return { error };
@@ -20,15 +20,13 @@ export async function register(email, password, nome) {
   const user = data.user;
 
   // cria perfil no BD
-  const { error: profileError } = await supabase
-    .from("profiles")
-    .insert([
-      {
-        id: user.id,
-        nome: nome,
-        pegada_total: 0
-      }
-    ]);
+  const { error: profileError } = await supabase.from("profiles").insert([
+    {
+      id: user.id,
+      nome: nome,
+      pegada_total: 0,
+    },
+  ]);
 
   if (profileError) {
     console.error(profileError);
@@ -47,4 +45,31 @@ export async function getUser() {
 // LOGOUT
 export async function logout() {
   return await supabase.auth.signOut();
+}
+
+// PERFIL DO USUÁRIO
+
+export async function getProfile() {
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  if (!user) return null;
+
+  const { data, error } = await supabase
+    .from("profiles")
+    .select("*")
+    .eq("id", user.id)
+    .single();
+
+  if (error) {
+    console.error(error);
+
+    return null;
+  }
+
+  return {
+    user,
+    profile: data,
+  };
 }
