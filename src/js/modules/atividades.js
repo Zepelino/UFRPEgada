@@ -1,4 +1,4 @@
-console.log("atividades.js carregado");
+console.log("atividades.js carregado com sucesso!");
 
 import {
   getUserActivityLogs,
@@ -6,116 +6,95 @@ import {
 } from "../services/activityService.js";
 
 // ===== ELEMENTOS =====
-
 const containerAtividade = document.getElementById("activity-container");
-
 const emptyState = document.getElementById("empty-state");
-
 const form = document.getElementById("meu-formulario-atividades");
 
 // ===== EMOJIS =====
-
 function obterEmoji(nome) {
-  if (nome.includes("Banho")) {
-    return "🚿";
-  }
-
-  if (nome.includes("Desktop")) {
-    return "🖥️";
-  }
-
-  if (nome.includes("Ar")) {
-    return "❄️";
-  }
-
+  if (!nome) return "🌱";
+  if (nome.includes("Banho")) return "🚿";
+  if (nome.includes("Desktop") || nome.includes("Computador")) return "🖥️";
+  if (nome.includes("Ar")) return "❄️";
   return "🌱";
 }
 
 // ===== CRIAR CARD =====
-
 function criarCardAtividade(log) {
   const emoji = obterEmoji(log.activity_name);
 
   return `
     <div class="activity-card">
-
       <div class="activity-header">
-
         <span class="activity-title">
           ${emoji} ${log.activity_name}
         </span>
-
         <span class="activity-duration">
           ${log.duration}h
         </span>
-
       </div>
-
       <div class="activity-info">
-
         <p>
-          CO₂ economizado:
-          ${log.co2_saved}kg
+          CO₂ emitido: <strong>${log.co2_saved}kg</strong>
         </p>
-
-        <p>
+        <p class="activity-date">
           ${log.date}
         </p>
-
       </div>
-
     </div>
   `;
 }
 
 // ===== RENDERIZAR =====
-
 function renderizarCards(logs) {
-  if (logs.length === 0) {
-    emptyState.classList.remove("hidden");
-
-    containerAtividade.innerHTML = "";
-
+  if (!containerAtividade) {
+    console.warn("Aviso: Elemento '#activity-container' não foi encontrado nesta página.");
     return;
   }
 
-  emptyState.classList.add("hidden");
+  if (logs.length === 0) {
+    if (emptyState) emptyState.classList.remove("hidden");
+    containerAtividade.innerHTML = "";
+    return;
+  }
 
+  if (emptyState) emptyState.classList.add("hidden");
   containerAtividade.innerHTML = logs.map(criarCardAtividade).join("");
 }
 
 // ===== CARREGAR LOGS =====
-
 async function carregarPagina() {
+  console.log("Buscando registros de atividades...");
   const logs = await getUserActivityLogs();
-
-  console.log(logs);
-
+  console.log("Registros carregados do banco:", logs);
   renderizarCards(logs);
 }
 
 // ===== REGISTRAR ATIVIDADE =====
+if (form) {
+  form.addEventListener("submit", async (e) => {
+    e.preventDefault();
 
-form.addEventListener("submit", async (e) => {
-  e.preventDefault();
+    const activityId = document.getElementById("select-atividade").value;
+    const duration = parseFloat(document.getElementById("input-tempo").value);
 
-  const activityId = document.getElementById("select-atividade").value;
+    if (!activityId || isNaN(duration)) {
+      alert("Por favor, preencha todos os campos corretamente.");
+      return;
+    }
 
-  const duration = parseFloat(document.getElementById("input-tempo").value);
+    // Salva no Supabase
+    await registerActivity(activityId, duration);
 
-  // salva no Supabase
+    // Recarrega os cards na tela atualizados
+    await carregarPagina();
 
-  await registerActivity(activityId, duration);
+    // Limpa o formulário
+    form.reset();
+  });
+} else {
+  console.log("Formulário '#meu-formulario-atividades' não encontrado na página atual. Listener não configurado.");
+}
 
-  // recarrega cards
-
-  await carregarPagina();
-
-  // limpa formulário
-
-  form.reset();
-});
-
-// ===== INICIAR =====
-
+// ===== INICIAR APLICAÇÃO =====
 carregarPagina();

@@ -23,7 +23,7 @@ function criarCardAtividade(log) {
       </p>
 
       <p>
-        CO₂ economizado:
+        CO₂ emitido:
         ${log.co2_saved}kg
       </p>
 
