@@ -25,7 +25,7 @@ export async function getUserActivityLogs() {
     .select(
       `
         *,
-        activities (
+        activities:activity_id (
           descricao,
           consumo_por_hora
         )
