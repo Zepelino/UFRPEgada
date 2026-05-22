@@ -4,7 +4,6 @@ import { supabase } from "./supabaseClient.js";
 // BUSCAR LOGS DO USUÁRIO
 // ==========================
 export async function getUserActivityLogs() {
-  // Usuário atual
   const {
     data: { user },
     error: userError,
@@ -15,12 +14,11 @@ export async function getUserActivityLogs() {
     return [];
   }
 
-  // Busca logs + atividade relacionada usando explicitamente a FK activity_id
   const { data, error } = await supabase
     .from("activity_logs")
     .select(`
       *,
-      activities:activity_id (
+      activities (
         descricao,
         consumo_por_hora
       )
@@ -35,24 +33,17 @@ export async function getUserActivityLogs() {
     return [];
   }
 
-  // Transforma e normaliza os dados
   return data.map((log) => {
     const inicio = new Date(log.inicio);
     const fim = new Date(log.fim);
-
-    // Duração em horas
     const duracao = (fim - inicio) / 1000 / 60 / 60;
 
-    // Garantindo a leitura mesmo se o Supabase retornar como Array ou Objeto
     const atividade = Array.isArray(log.activities) 
       ? log.activities[0] 
       : log.activities;
 
-    // Caso ainda venha nulo, vamos exibir o ID para te ajudar a debugar no site
-    const descricao = atividade ? atividade.descricao : `ID não encontrado (${log.activity_id})`;
+    const descricao = atividade ? atividade.descricao : "Atividade não identificada";
     const consumoPorHora = atividade ? atividade.consumo_por_hora : 0;
-
-    // Cálculo CO₂
     const co2 = duracao * consumoPorHora;
 
     return {
@@ -68,23 +59,16 @@ export async function getUserActivityLogs() {
 // REGISTRAR NOVA ATIVIDADE
 // ==========================
 export async function registerActivity(activityId, duration) {
-  // Usuário atual
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  const { data: { user } } = await supabase.auth.getUser();
 
   if (!user) {
     console.error("Não foi possível registrar: usuário não autenticado.");
     return;
   }
 
-  // Horário atual
   const inicio = new Date();
-
-  // Calcula o horário de fim baseado na duração informada
   const fim = new Date(inicio.getTime() + duration * 60 * 60 * 1000);
 
-  // Salva o log no banco
   const { error } = await supabase.from("activity_logs").insert([
     {
       user_id: user.id,
@@ -94,7 +78,22 @@ export async function registerActivity(activityId, duration) {
     },
   ]);
 
+  if (error) console.error("Erro ao inserir atividade:", error);
+}
+
+// ==========================
+// BUSCAR CATÁLOGO DE ATIVIDADES
+// ==========================
+export async function getActivitiesCatalog() {
+  const { data, error } = await supabase
+    .from("activities")
+    .select("*")
+    .order("categoria", { ascending: true });
+
   if (error) {
-    console.error("Erro ao inserir nova atividade no Supabase:", error);
+    console.error("Erro ao buscar catálogo de atividades:", error);
+    return [];
   }
+  
+  return data;
 }

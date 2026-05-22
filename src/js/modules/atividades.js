@@ -3,23 +3,28 @@ console.log("atividades.js carregado com sucesso!");
 import {
   getUserActivityLogs,
   registerActivity,
+  getActivitiesCatalog
 } from "../services/activityService.js";
 
-// ===== ELEMENTOS =====
 const containerAtividade = document.getElementById("activity-container");
 const emptyState = document.getElementById("empty-state");
 const form = document.getElementById("meu-formulario-atividades");
+const selectAtividade = document.getElementById("select-atividade");
 
 // ===== EMOJIS =====
 function obterEmoji(nome) {
   if (!nome) return "🌱";
   if (nome.includes("Banho")) return "🚿";
-  if (nome.includes("Desktop") || nome.includes("Computador")) return "🖥️";
-  if (nome.includes("Ar")) return "❄️";
+  if (nome.includes("Desktop") || nome.includes("Computador") || nome.includes("Notebook") || nome.includes("Gamer")) return "🖥️";
+  if (nome.includes("Ar") || nome.includes("Ventilador")) return "❄️";
+  if (nome.includes("Secador") || nome.includes("Ferro") || nome.includes("Secadora")) return "🔥";
+  if (nome.includes("Voo")) return "✈️";
+  if (nome.includes("Carro") || nome.includes("Moto") || nome.includes("Ônibus")) return "🚗";
+  if (nome.includes("Plantar") || nome.includes("Árvore")) return "🌲";
   return "🌱";
 }
 
-// ===== CRIAR CARD =====
+// ===== CRIAR CARD DE HISTÓRICO =====
 function criarCardAtividade(log) {
   const emoji = obterEmoji(log.activity_name);
 
@@ -45,12 +50,9 @@ function criarCardAtividade(log) {
   `;
 }
 
-// ===== RENDERIZAR =====
+// ===== RENDERIZAR CARDS =====
 function renderizarCards(logs) {
-  if (!containerAtividade) {
-    console.warn("Aviso: Elemento '#activity-container' não foi encontrado nesta página.");
-    return;
-  }
+  if (!containerAtividade) return;
 
   if (logs.length === 0) {
     if (emptyState) emptyState.classList.remove("hidden");
@@ -62,11 +64,38 @@ function renderizarCards(logs) {
   containerAtividade.innerHTML = logs.map(criarCardAtividade).join("");
 }
 
-// ===== CARREGAR LOGS =====
+// ===== CARREGAR OPÇÕES DO FORMULÁRIO (CATEGORIAS) =====
+async function carregarOpcoesFormulario() {
+  if (!selectAtividade) return;
+
+  const atividades = await getActivitiesCatalog();
+  const categoriasAgrupadas = {};
+  
+  atividades.forEach(ativ => {
+    const cat = ativ.categoria || "Outras Atividades";
+    if (!categoriasAgrupadas[cat]) {
+      categoriasAgrupadas[cat] = [];
+    }
+    categoriasAgrupadas[cat].push(ativ);
+  });
+
+  let htmlSelect = `<option value="" disabled selected>Escolha uma atividade...</option>`;
+  
+  for (const categoria in categoriasAgrupadas) {
+    htmlSelect += `<optgroup label="${categoria}">`;
+    categoriasAgrupadas[categoria].forEach(ativ => {
+      htmlSelect += `<option value="${ativ.id}">${ativ.descricao}</option>`;
+    });
+    htmlSelect += `</optgroup>`;
+  }
+
+  selectAtividade.innerHTML = htmlSelect;
+}
+
+// ===== CARREGAR PÁGINA =====
 async function carregarPagina() {
-  console.log("Buscando registros de atividades...");
+  await carregarOpcoesFormulario();
   const logs = await getUserActivityLogs();
-  console.log("Registros carregados do banco:", logs);
   renderizarCards(logs);
 }
 
@@ -75,26 +104,18 @@ if (form) {
   form.addEventListener("submit", async (e) => {
     e.preventDefault();
 
-    const activityId = document.getElementById("select-atividade").value;
+    const activityId = selectAtividade.value;
     const duration = parseFloat(document.getElementById("input-tempo").value);
 
     if (!activityId || isNaN(duration)) {
-      alert("Por favor, preencha todos os campos corretamente.");
+      alert("Por favor, selecione uma atividade e insira o tempo.");
       return;
     }
 
-    // Salva no Supabase
     await registerActivity(activityId, duration);
-
-    // Recarrega os cards na tela atualizados
     await carregarPagina();
-
-    // Limpa o formulário
     form.reset();
   });
-} else {
-  console.log("Formulário '#meu-formulario-atividades' não encontrado na página atual. Listener não configurado.");
 }
 
-// ===== INICIAR APLICAÇÃO =====
 carregarPagina();
