@@ -63,22 +63,56 @@ export async function registerActivity(activityId, duration) {
 
   if (!user) {
     console.error("Não foi possível registrar: usuário não autenticado.");
-    return;
+    throw new Error("Usuário não autenticado");
   }
 
   const inicio = new Date();
   const fim = new Date(inicio.getTime() + duration * 60 * 60 * 1000);
 
-  const { error } = await supabase.from("activity_logs").insert([
+  const { data, error } = await supabase.from("activity_logs").insert([
     {
       user_id: user.id,
       activity_id: activityId,
       inicio: inicio.toISOString(),
       fim: fim.toISOString(),
     },
-  ]);
+  ]).select(`
+    *,
+    activities (
+      descricao,
+      consumo_por_hora
+    )
+  `).single();
 
-  if (error) console.error("Erro ao inserir atividade:", error);
+  if (error) {
+    console.error("Erro ao inserir atividade:", error);
+    throw new Error(error.message || "Erro ao registrar atividade");
+  }
+
+  // Buscar informações da atividade para calcular CO2
+  let consumoPorHora = 0;
+  let descricao = "Atividade";
+  
+  if (data.activities) {
+    const atividade = Array.isArray(data.activities) 
+      ? data.activities[0] 
+      : data.activities;
+    
+    consumoPorHora = atividade?.consumo_por_hora || 0;
+    descricao = atividade?.descricao || "Atividade";
+  }
+
+  // Calcular CO2 emitido
+  const co2_emitted = duration * consumoPorHora;
+
+  // Retornar dados completos para o frontend
+  return {
+    success: true,
+    co2_emitted: co2_emitted,
+    activity_name: descricao,
+    duration: duration,
+    data: data
+  };
 }
 
 // ==========================
@@ -95,5 +129,5 @@ export async function getActivitiesCatalog() {
     return [];
   }
   
-  return data;
+  return data || [];
 }

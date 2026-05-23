@@ -226,3 +226,200 @@ body {
 .hidden {
   display: none;
 }
+
+
+/* ===== Seção card da atividade atual ===== */
+
+.feedback-section {
+  margin-top: -8px;
+  overflow: hidden;
+  transition: all 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.feedback-section.hidden {
+  max-height: 0;
+  opacity: 0;
+  margin-top: 0;
+  margin-bottom: 0;
+  pointer-events: none;
+}
+
+.feedback-section:not(.hidden) {
+  max-height: 500px;
+  opacity: 1;
+  margin-top: 24px;
+  margin-bottom: 16px;
+}
+
+.feedback-card {
+  background: linear-gradient(135deg, #e8f5e9 0%, #c8e6c9 100%);
+  border-left: 8px solid #1b4332;
+  border-radius: 20px;
+  padding: 32px 28px;
+  display: flex;
+  align-items: center;
+  gap: 24px;
+  box-shadow: 0 12px 35px rgba(27, 67, 50, 0.2), 0 4px 8px rgba(0, 0, 0, 0.08);
+  position: relative;
+  overflow: hidden;
+  transform: translateY(20px);
+  opacity: 0;
+  transition: all 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Efeito sutil de luz no topo */
+.feedback-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+  background: linear-gradient(90deg, transparent, #2d6a4f, #40916c, #2d6a4f, transparent);
+  opacity: 0.6;
+}
+
+/* Estado visível */
+.feedback-section:not(.hidden) .feedback-card {
+  transform: translateY(0);
+  opacity: 1;
+  animation: slideInFeedback 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Estado ocultando */
+.feedback-section.hiding .feedback-card {
+  transform: translateY(-20px);
+  opacity: 0;
+  animation: slideOutFeedback 0.5s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+}
+
+@keyframes slideInFeedback {
+  from {
+    transform: translateY(30px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+@keyframes slideOutFeedback {
+  from {
+    transform: translateY(0);
+    opacity: 1;
+  }
+  to {
+    transform: translateY(-30px);
+    opacity: 0;
+  }
+}
+
+.feedback-icon {
+  font-size: 3.5rem;
+  background: white;
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+  flex-shrink: 0;
+  animation: softPulse 3s ease-in-out infinite;
+  transition: transform 0.3s ease;
+}
+
+@keyframes softPulse {
+  0%, 100% {
+    transform: scale(1);
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+  }
+  50% {
+    transform: scale(1.05);
+    box-shadow: 0 12px 30px rgba(0, 0, 0, 0.2);
+  }
+}
+
+.feedback-content {
+  flex: 1;
+}
+
+.feedback-content h3 {
+  color: #1b4332;
+  margin: 0 0 12px 0;
+  font-size: 1.3rem;
+  font-weight: 700;
+}
+
+.feedback-content .feedback-description {
+  color: #2d6a4f;
+  margin: 0 0 16px 0;
+  font-size: 1.05rem;
+  line-height: 1.5;
+}
+
+.feedback-content .feedback-description strong {
+  color: #1b4332;
+  font-weight: 600;
+}
+
+/* Destaque do CO₂ */
+.feedback-co2-highlight {
+  background: rgba(27, 67, 50, 0.08);
+  border-radius: 14px;
+  padding: 16px 20px;
+  margin-top: 8px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  border: 2px dashed rgba(45, 106, 79, 0.3);
+}
+
+.feedback-co2-icon {
+  font-size: 2rem;
+  flex-shrink: 0;
+}
+
+.feedback-co2-info {
+  flex: 1;
+}
+
+.feedback-co2-label {
+  color: #2d6a4f;
+  font-size: 0.85rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-bottom: 4px;
+}
+
+.feedback-co2-value {
+  color: #081c15;
+  font-size: 2.2rem;
+  font-weight: 800;
+  line-height: 1;
+}
+
+.feedback-co2-unit {
+  color: #1b4332;
+  font-size: 1rem;
+  font-weight: 600;
+}
+
+/* Animação de giro do ícone da atividade atual */
+@keyframes flipIconZ {
+  0% {
+    transform: rotate(0deg) scale(1);
+  }
+  50% {
+    transform: rotate(360deg) scale(1);
+  }
+  100% {
+    transform: rotate(360deg) scale(1);
+  }
+}
+
+.feedback-icon.flipping {
+  animation: flipIconZ 0.8s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+}
