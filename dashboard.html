@@ -11,6 +11,8 @@
     <link rel="stylesheet" href="src/css/dashboard.css" />
 </head>
 
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
 <body>
     <header class="topbar">
         <h1>UFRPEgada</h1>
@@ -71,10 +73,17 @@
             </div>
 
         </section>
+        
+        <section class="chart-card">
+            <div class="chart-header">
+            <h2>Emissões da Semana</h2>
+            </div>
+            <canvas id="weeklyChart"></canvas>
+        </section>
 
     </main>
 
     <script type="module" src="src/js/pages/dashboard.js"></script>
 </body>
-
+<script src="src/js/pages/dashboard.js"></script>
 </html>

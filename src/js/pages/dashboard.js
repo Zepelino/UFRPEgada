@@ -78,7 +78,7 @@ function configurarDataHoje() {
 async function inicializarDashboard() {
   configurarDataHoje();
   todosOsLogs = await getUserActivityLogs();
-  
+
   if (!todosOsLogs || todosOsLogs.length === 0) {
     if (totalCo2Element) totalCo2Element.innerText = "0.00 kg CO₂";
     if (totalAtividadesElement) totalAtividadesElement.innerText = "0";
@@ -95,6 +95,7 @@ async function inicializarDashboard() {
   if (totalAtividadesElement) totalAtividadesElement.innerText = quantidadeAtividadesGeral;
 
   renderizarLogDoDia(seletorData.value);
+  renderizarGraficoSemanal();
 }
 
 // ===== LISTENER PARA DATA =====
@@ -105,3 +106,145 @@ if (seletorData) {
 }
 
 inicializarDashboard();
+
+
+// ===== DASHBOARD DE EMISSÕES - GRÁFICO =====
+
+function renderizarGraficoSemanal() {
+
+  const diasSemana = [];
+  const valoresSemana = [];
+
+  for (let i = 6; i >= 0; i--) {
+    const data = new Date();
+    data.setDate(data.getDate() - i);
+    
+    const dia = String(
+      data.getDate()
+    ).padStart(2, "0");
+    
+    const mes = String(
+      data.getMonth() + 1
+    ).padStart(2, "0");
+
+    const dataBR = `${dia}/${mes}/${data.getFullYear()}`;
+
+    diasSemana.push(dia);
+
+    const logsDia = todosOsLogs.filter(
+      log => log.date === dataBR
+    );
+
+    const totalDia = logsDia.reduce(
+      (acc, log) =>
+        acc + parseFloat(log.co2_saved),
+      0
+    );
+    valoresSemana.push(totalDia);
+  }
+
+  const emissoesPorDia = {
+    Dom: 0,
+    Seg: 0,
+    Ter: 0,
+    Qua: 0,
+    Qui: 0,
+    Sex: 0,
+    Sab: 0
+  };
+
+  todosOsLogs.forEach(log => {
+    const [dia, mes, ano] = log.date.split("/");
+    const dataObj = new Date(
+      `${ano}-${mes}-${dia}`
+    );
+    const diaSemana =
+      diasSemana[dataObj.getDay()];
+    emissoesPorDia[diaSemana] +=
+      parseFloat(log.co2_saved);
+  });
+
+  const valores = Object.values(
+    emissoesPorDia
+  );
+
+  const ctx =
+    document.getElementById("weeklyChart");
+  if (!ctx) return;
+
+  new Chart(ctx, {
+    type: "line",
+    data: {
+      labels: diasSemana,
+      datasets: [{
+        label: "kg CO₂",
+        data: valoresSemana,
+        borderColor: "#2d6a4f",
+        backgroundColor: "rgba(45, 106, 79, 0.12)",
+        fill: "origin",
+        tension: 0.45,
+        cubicInterpolationMode: 'monotone',
+        borderWidth: 3,
+        pointRadius: 5,
+        pointHoverRadius: 7,
+        pointBackgroundColor: "#ffffff",
+        pointBorderColor: "#2d6a4f",
+        pointBorderWidth: 3
+      }]
+    },
+    options: {
+      layout: {
+        padding: {
+          top: 10,
+          right: 20,
+          bottom: 10,
+          left: 10
+        }
+      },
+      responsive: true,
+      maintainAspectRatio: false,
+      interaction: {
+        intersect: false,
+        mode: "index"
+      },
+      plugins: {
+        legend: {
+          display: false
+        },
+        tooltip: {
+          backgroundColor: "#1b4332",
+          titleColor: "#fff",
+          bodyColor: "#fff",
+          padding: 12,
+          displayColors: false,
+          cornerRadius: 10,
+          callbacks: {
+            label: function (context) {
+              return `${context.parsed.y.toFixed(2)} kg CO₂`;
+            }
+          }
+        }
+      },
+
+      scales: {
+        x: {
+          grid: {
+            display: false
+          },
+          ticks: {
+            color: "#666"
+          }
+        },
+        y: {
+          beginAtZero: true,
+          grid: {
+            color: "rgba(0,0,0,0.05)"
+          },
+          ticks: {
+            color: "#666"
+          }
+        }
+      }
+    }
+  });
+}

@@ -2,19 +2,15 @@
 
 body {
   margin: 0;
-
   font-family: Arial, sans-serif;
-
-  background-color: #f4f7eb;
-
+  background: linear-gradient(135deg, #f4f7f0 0%, #edf5ea 100%);
   color: #333;
 }
 
 /* ===== HEADER ===== */
 
 .topbar {
-  background-color: #366e2a;
-
+  background: linear-gradient(135deg, #366e2a 0%, #2d5a21 100%);
   color: white;
 
   display: flex;
