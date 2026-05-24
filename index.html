@@ -1,31 +1,60 @@
 <!doctype html>
 <html lang="pt-br">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>pagina principal</title>
-    <link rel="icon" href="src/assets/imagens/UFRPEgada_LOGO.png" type="image/png">
-    <link rel="stylesheet" href="src/css/global.css" />
-  </head>
-  <header>
-    <img
-      class="ufrpegada"
-      src="src/assets/imagens/UFRPEGADA_LOtex2.png"
-      alt="UFRPEgada"
-    />
-  </header>
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>UFRPEgada | Sua Pegada Ecológica</title>
+  <link rel="icon" href="src/assets/imagens/UFRPEgada_LOGO.png" type="image/png">
+  <link rel="stylesheet" href="src/css/global.css" />
+  <link rel="stylesheet" href="src/css/index.css" />
+</head>
+<body>
+  <!-- Container das folhas no fundo -->
+  <div id="leaves-container"></div>
 
-  <section class="hero">
-    <h2>Reduza sua pegada ecológica no campus</h2>
-    <a href="login.html"><button class="comecar">COMEÇAR</button></a>
-    <section class="features">
-      <div class="card">Registre hábitos</div>
-      <div class="card">Veja seu impacto</div>
-      <div class="card">Melhore sua rotina</div>
+  <div class="main-container">
+    <header>
+      <img
+        class="ufrpegada"
+        src="src/assets/imagens/UFRPEGADA_LOtex2.png"
+        alt="UFRPEgada"
+      />
+    </header>
+
+    <section class="hero">
+      <h2>Reduza sua pegada ecológica no campus</h2>
+      <p class="hero-description">
+        Monitore seus hábitos diários, visualize seu impacto ambiental 
+        e contribua para um futuro mais sustentável
+      </p>
+      <a href="login.html">
+        <button class="comecar">COMEÇAR</button>
+      </a>
     </section>
-  </section>
 
-  <footer>
-    <p>Projeto UFRPE</p>
-  </footer>
+    <section class="features">
+      <div class="card">
+        <span class="card-icon">📝</span>
+        <h3>Registre hábitos</h3>
+        <p>Acompanhe suas atividades diárias e seu consumo de recursos</p>
+      </div>
+      <div class="card">
+        <span class="card-icon">📊</span>
+        <h3>Veja seu impacto</h3>
+        <p>Visualize gráficos e dados sobre sua pegada de carbono</p>
+      </div>
+      <div class="card">
+        <span class="card-icon">🌱</span>
+        <h3>Melhore sua rotina</h3>
+        <p>Receba dicas personalizadas para reduzir seu impacto ambiental</p>
+      </div>
+    </section>
+
+    <footer>
+      <p>© 2026 UFRPEgada - Projeto UFRPE</p>
+    </footer>
+  </div>
+
+  <script src="src/js/folhas.js"></script>
+</body>
 </html>

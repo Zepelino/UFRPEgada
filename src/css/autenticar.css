@@ -1,0 +1,160 @@
+/* ===== AUTENTICAR CSS - UFRPEgada ===== */
+
+body {
+  margin: 0;
+  font-family: Arial, sans-serif;
+  background: linear-gradient(135deg, #a1b965, #1f4325);
+  min-height: 100vh;
+  position: relative;
+  overflow-x: hidden;
+}
+
+/* Container das folhas no fundo */
+#leaves-container {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: 0;
+  overflow: hidden;
+}
+
+/* Container principal */
+.main-container {
+  position: relative;
+  z-index: 1;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 40px 20px;
+}
+
+/* Header */
+header {
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  margin-bottom: 30px;
+}
+
+.ufrpegada {
+  max-width: 200px;
+  width: 60%;
+  height: auto;
+  filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.2));
+}
+
+/* Seção Hero */
+.hero {
+  text-align: center;
+  margin-bottom: 40px;
+}
+
+.success-icon {
+  font-size: 5rem;
+  display: block;
+  margin-bottom: 24px;
+  animation: softPulse 3s ease-in-out infinite;
+}
+
+@keyframes softPulse {
+  0%, 100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.1);
+  }
+}
+
+.hero h2 {
+  color: white;
+  font-size: 2.2rem;
+  margin-bottom: 16px;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+  font-weight: 700;
+}
+
+.hero-description {
+  color: rgba(255, 255, 255, 0.9);
+  font-size: 1.2rem;
+  margin-bottom: 35px;
+  max-width: 500px;
+  margin-left: auto;
+  margin-right: auto;
+  line-height: 1.6;
+}
+
+/* Botão */
+.comecar {
+  border-radius: 14px;
+  background: white;
+  color: #1f4325;
+  border: none;
+  padding: 18px 40px;
+  display: inline-block;
+  font-size: 1.2rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+  letter-spacing: 2px;
+  text-transform: uppercase;
+}
+
+.comecar:hover {
+  background: #f0f7e6;
+  transform: translateY(-3px);
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3);
+}
+
+.comecar:active {
+  transform: translateY(-1px);
+}
+
+/* Footer */
+footer {
+  text-align: center;
+  padding: 30px 20px;
+  color: rgba(255, 255, 255, 0.8);
+  margin-top: auto;
+  font-size: 0.9rem;
+}
+
+footer p {
+  margin: 0;
+}
+
+/* Responsividade */
+@media (max-width: 768px) {
+  .hero h2 {
+    font-size: 1.8rem;
+  }
+  
+  .hero-description {
+    font-size: 1rem;
+    padding: 0 20px;
+  }
+  
+  .success-icon {
+    font-size: 4rem;
+  }
+  
+  .comecar {
+    font-size: 1.1rem;
+    padding: 16px 35px;
+  }
+}
+
+@media (max-width: 480px) {
+  .hero h2 {
+    font-size: 1.5rem;
+  }
+  
+  .main-container {
+    padding: 30px 15px;
+  }
+}

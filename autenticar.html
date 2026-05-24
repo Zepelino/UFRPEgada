@@ -3,25 +3,41 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>pagina principal</title>
+    <title>Confirmação | UFRPEgada</title>
     <link rel="icon" href="src/assets/imagens/UFRPEgada_LOGO.png" type="image/png">
     <link rel="stylesheet" href="src/css/global.css" />
+    <link rel="stylesheet" href="src/css/index.css" />
   </head>
-  <header>
-    <img
-      class="ufrpegada"
-      src="src/assets/imagens/UFRPEgada_LOGO.png"
-      alt="UFRPEgada"
-    />
-  </header>
+  <body>
+    <!-- Container das folhas no fundo -->
+    <div id="leaves-container"></div>
 
-  <section class="hero">
-    <h2>Parabéns, sua conta foi criada com sucesso.</h2>
-    <h1>Realize a autenticação pelo email enviado.</h1>
-    <a href="login.html"><button class="comecar">LOGIN</button></a>
-  </section>
+    <div class="main-container">
+      <header>
+        <img
+          class="ufrpegada"
+          src="src/assets/imagens/UFRPEgada_LOGO.png"
+          alt="UFRPEgada"
+        />
+      </header>
 
-  <footer>
-    <p>Projeto UFRPE</p>
-  </footer>
+      <section class="hero">
+        <div class="success-icon">✅</div>
+        <h2>Conta criada com sucesso!</h2>
+        <p class="hero-description">
+          Enviamos um email de confirmação para sua caixa de entrada.
+          Verifique e autentique sua conta para começar a usar.
+        </p>
+        <a href="login.html">
+          <button class="comecar">IR PARA LOGIN</button>
+        </a>
+      </section>
+
+      <footer>
+        <p>© 2026 UFRPEgada - Projeto UFRPE</p>
+      </footer>
+    </div>
+
+    <script src="src/js/folhas.js"></script>
+  </body>
 </html>

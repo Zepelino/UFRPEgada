@@ -1,4 +1,5 @@
 import { login } from "../services/authService.js";
+import "/src/js/folhas.js"
 
 const form = document.getElementById("login-form");
 const errorMessage = document.getElementById("error-message");
@@ -17,3 +18,4 @@ form.addEventListener("submit", async (e) => {
     window.location.href = "usuario.html";
   }
 });
+
