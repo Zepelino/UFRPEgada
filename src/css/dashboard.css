@@ -153,6 +153,54 @@ body {
   margin-top: 20px;
 }
 
-#weeklyChart {
+#emissionChart {
   max-height: 280px !important;
+}
+
+/* Header do gráfico com seletor de período */
+.chart-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+  flex-wrap: wrap;
+  gap: 15px;
+}
+
+.chart-header h2 {
+  margin: 0;
+  color: #1b4332;
+}
+
+/* Seletor de período */
+.period-selector {
+  display: flex;
+  gap: 8px;
+  background: #f0f2f5;
+  border-radius: 10px;
+  padding: 4px;
+}
+
+.period-btn {
+  padding: 8px 16px;
+  border: none;
+  background: transparent;
+  color: #666;
+  font-size: 0.9rem;
+  font-weight: 500;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  font-family: inherit;
+}
+
+.period-btn:hover {
+  background: rgba(45, 106, 79, 0.1);
+  color: #2d6a4f;
+}
+
+.period-btn.active {
+  background: #2d6a4f;
+  color: white;
+  box-shadow: 0 2px 8px rgba(45, 106, 79, 0.3);
 }

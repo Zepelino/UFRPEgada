@@ -76,9 +76,14 @@
         
         <section class="chart-card">
             <div class="chart-header">
-            <h2>Emissões da Semana</h2>
+                <h2>Emissões de CO₂</h2>
+                <div class="period-selector">
+                    <button class="period-btn active" data-period="semanal">Semanal</button>
+                    <button class="period-btn" data-period="mensal">Mensal</button>
+                    <button class="period-btn" data-period="anual">Anual</button>
+                </div>
             </div>
-            <canvas id="weeklyChart"></canvas>
+            <canvas id="emissionChart"></canvas>
         </section>
 
     </main>
