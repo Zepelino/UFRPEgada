@@ -74,7 +74,7 @@
 
         </section>
         
-        <section class="chart-card">
+        <section class="chart-card chart-card-emission">
             <div class="chart-header">
                 <h2>Emissões de CO₂</h2>
                 <div class="period-selector">
@@ -84,6 +84,20 @@
                 </div>
             </div>
             <canvas id="emissionChart"></canvas>
+        </section>
+        
+        <section class="chart-card chart-card-impact">
+            <div class="chart-header">
+                <h2>Atividades Mais Impactantes</h2>
+                <div class="period-selector">
+                    <button class="impact-btn active" data-impact-period="semanal">Semanal</button>
+                    <button class="impact-btn" data-impact-period="mensal">Mensal</button>
+                    <button class="impact-btn" data-impact-period="anual">Anual</button>
+                </div>
+            </div>
+            <div class="chart-impact-container">
+                <canvas id="impactChart"></canvas>
+            </div>
         </section>
 
     </main>

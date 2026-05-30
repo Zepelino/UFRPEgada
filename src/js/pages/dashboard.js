@@ -8,6 +8,8 @@ const listaUltimasAtividades = document.getElementById("dashboard-lista-atividad
 const seletorData = document.getElementById("filtro-data-diario");
 let emissionChart = null;
 let currentPeriod = 'semanal';
+let impactChart = null;
+let currentImpactPeriod = 'semanal';
 
 let todosOsLogs = [];
 
@@ -100,7 +102,221 @@ async function inicializarDashboard() {
   
   // Setup dos botões e carregar gráfico inicial
   setupPeriodSelector();
+  setupImpactPeriodSelector();
   carregarGrafico('semanal');
+  carregarGraficoImpacto('semanal');
+}
+
+// ===== SETUP DOS BOTÕES DE PERÍODO DO GRÁFICO DE IMPACTO =====
+function setupImpactPeriodSelector() {
+  const impactButtons = document.querySelectorAll('.impact-btn');
+  if (!impactButtons.length) return;
+  
+  impactButtons.forEach(button => {
+    button.addEventListener('click', async () => {
+      impactButtons.forEach(btn => btn.classList.remove('active'));
+      button.classList.add('active');
+      
+      currentImpactPeriod = button.dataset.impactPeriod;
+      carregarGraficoImpacto(currentImpactPeriod);
+    });
+  });
+}
+
+// ===== CARREGAR GRÁFICO DE IMPACTO =====
+function carregarGraficoImpacto(periodo) {
+  const dadosAgrupados = agruparAtividadesPorImpacto(periodo);
+  renderizarGraficoRosa(dadosAgrupados);
+}
+
+// ===== AGRUPAR ATIVIDADES POR IMPACTO =====
+function agruparAtividadesPorImpacto(periodo) {
+  const hoje = new Date();
+  let dataInicio;
+  
+  if (periodo === 'semanal') {
+    dataInicio = new Date(hoje);
+    dataInicio.setDate(dataInicio.getDate() - 7);
+  } else if (periodo === 'mensal') {
+    dataInicio = new Date(hoje);
+    dataInicio.setMonth(dataInicio.getMonth() - 1);
+  } else if (periodo === 'anual') {
+    dataInicio = new Date(hoje);
+    dataInicio.setFullYear(dataInicio.getFullYear() - 1);
+  }
+  
+  // Filtrar logs pelo período
+  const logsFiltrados = todosOsLogs.filter(log => {
+    const [dia, mes, ano] = log.date.split("/");
+    const dataLog = new Date(`${ano}-${mes}-${dia}`);
+    return dataLog >= dataInicio && dataLog <= hoje;
+  });
+  
+  // Agrupar por atividade
+  const atividadesMap = {};
+  
+  logsFiltrados.forEach(log => {
+    const nome = log.activity_name || 'Outros';
+    if (!atividadesMap[nome]) {
+      atividadesMap[nome] = {
+        nome: nome,
+        co2Total: 0,
+        horasTotal: 0,
+        count: 0
+      };
+    }
+    atividadesMap[nome].co2Total += parseFloat(log.co2_saved || 0);
+    atividadesMap[nome].horasTotal += parseFloat(log.duration || 0);
+    atividadesMap[nome].count++;
+  });
+  
+  // Converter para array e ordenar por impacto (maior primeiro)
+  let atividadesArray = Object.values(atividadesMap);
+  atividadesArray.sort((a, b) => b.co2Total - a.co2Total);
+  
+  // Pegar as 8 mais impactantes
+  const top8 = atividadesArray.slice(0, 8);
+  
+  // Se tiver mais atividades, agrupar o resto como "Outras"
+  if (atividadesArray.length > 8) {
+    const outras = atividadesArray.slice(8);
+    const outrasAgrupadas = {
+      nome: 'Outras atividades',
+      co2Total: outras.reduce((sum, a) => sum + a.co2Total, 0),
+      horasTotal: outras.reduce((sum, a) => sum + a.horasTotal, 0),
+      count: outras.reduce((sum, a) => sum + a.count, 0)
+    };
+    top8.push(outrasAgrupadas);
+  }
+  
+  return top8;
+}
+
+// ===== RENDERIZAR GRÁFICO ROSA (NIGHTINGALE ROSE) =====
+function renderizarGraficoRosa(dados) {
+  const ctx = document.getElementById("impactChart");
+  if (!ctx) return;
+  
+  if (impactChart) {
+    impactChart.destroy();
+  }
+  
+  const cores = [
+    '#2d6a4f', '#e07b39', '#4a90a4', '#8e44ad',
+    '#c44569', '#3b82f6', '#e67e22', '#16a085',
+    '#d4a017',
+  ];
+  
+  const labels = dados.map(d => {
+    const emoji = obterEmoji(d.nome);
+    return `${emoji} ${d.nome}`;
+  });
+  
+  const valores = dados.map(d => d.co2Total);
+  const horas = dados.map(d => d.horasTotal);
+  
+  impactChart = new Chart(ctx, {
+    type: 'polarArea',
+    data: {
+      labels: labels,
+      datasets: [{
+        data: valores,
+        backgroundColor: cores.slice(0, dados.length).map(c => c + 'CC'),
+        borderColor: cores.slice(0, dados.length).map(c => c + 'FF'),
+        borderWidth: 2.5,
+        hoverBackgroundColor: cores.slice(0, dados.length),
+        hoverBorderWidth: 3,
+        hoverBorderColor: '#1b4332',
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      layout: {
+        padding: {
+          top: 20,
+          bottom: 20,
+          left: 10,
+          right: 10
+        }
+      },
+      plugins: {
+        legend: {
+          position: 'right',
+          align: 'center',
+          maxWidth: 220,
+          labels: {
+            color: '#333',
+            font: {
+              size: 13
+            },
+            padding: 14,
+            usePointStyle: true,
+            pointStyle: 'circle',
+            boxWidth: 12,
+            boxHeight: 12,
+            generateLabels: function(chart) {
+              const data = chart.data;
+              return data.labels.map((label, i) => ({
+                text: label,
+                fillStyle: data.datasets[0].backgroundColor[i],
+                strokeStyle: data.datasets[0].borderColor[i],
+                lineWidth: 2,
+                hidden: false,
+                index: i,
+                pointStyle: 'circle'
+              }));
+            }
+          }
+        },
+        tooltip: {
+          backgroundColor: "#1b4332",
+          titleColor: "#fff",
+          bodyColor: "#fff",
+          padding: 14,
+          cornerRadius: 10,
+          callbacks: {
+            label: function(context) {
+              const horaItem = horas[context.dataIndex];
+              const valor = valores[context.dataIndex];
+              return [
+                `CO₂: ${valor.toFixed(2)} kg`,
+                `Tempo: ${horaItem.toFixed(1)}h`,
+              ];
+            }
+          }
+        }
+      },
+      scales: {
+        r: {
+          beginAtZero: true,
+          suggestedMax: Math.max(...valores) * 1.25,
+          ticks: {
+            display: true,
+            backdropColor: 'transparent',
+            color: '#999',
+            font: {
+              size: 10
+            },
+            count: 4,
+            callback: function(value) {
+              return value.toFixed(1) + ' kg';
+            }
+          },
+          grid: {
+            color: 'rgba(0,0,0,0.05)',
+            circular: true
+          },
+          angleLines: {
+            color: 'rgba(0,0,0,0.05)'
+          },
+          pointLabels: {
+            display: false,
+          }
+        }
+      }
+    }
+  });
 }
 
 // ===== LISTENER PARA DATA =====

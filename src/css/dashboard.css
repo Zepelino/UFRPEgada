@@ -12,13 +12,10 @@ body {
 .topbar {
   background: linear-gradient(135deg, #366e2a 0%, #2d5a21 100%);
   color: white;
-
   display: flex;
   justify-content: space-between;
   align-items: center;
-
   padding: 15px 40px;
-
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
 }
 
@@ -46,15 +43,11 @@ body {
 #logout-btn {
   background-color: white;
   color: #1f4325;
-
   border: none;
   border-radius: 8px;
-
   padding: 8px 16px;
-
   cursor: pointer;
   font-weight: bold;
-
   transition: 0.2s;
 }
 
@@ -68,7 +61,6 @@ body {
   max-width: 1200px;
   margin: 40px auto;
   padding: 20px;
-
   display: flex;
   flex-direction: column;
   gap: 24px;
@@ -80,14 +72,10 @@ body {
   gap: 20px;
 }
 
-.stat-card,
-.recent-activities {
+.stat-card {
   background: white;
-
   border-radius: 20px;
-
   padding: 28px;
-
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
 }
 
@@ -102,6 +90,13 @@ body {
   color: #2d6a4f;
 }
 
+.recent-activities {
+  background: white;
+  border-radius: 20px;
+  padding: 28px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+}
+
 .recent-activities h2 {
   margin-bottom: 20px;
   color: #1b4332;
@@ -111,9 +106,7 @@ body {
   display: flex;
   justify-content: space-between;
   align-items: center;
-
   padding: 16px 0;
-
   border-bottom: 1px solid #ececec;
 }
 
@@ -121,43 +114,30 @@ body {
   border-bottom: none;
 }
 
-/* --- GRÁFICO DE EMISSÕES SEMANAIS --- */
+/* ===== CARDS DE GRÁFICO ===== */
 
+/* Estilo base */
 .chart-card {
   background: white;
-
   border-radius: 20px;
-
   padding: 30px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+  overflow: visible;
+}
 
-  box-shadow: 0 4px 12px rgba(0,0,0,0.08);
-
+/* Card do gráfico de emissões */
+.chart-card-emission {
   height: 420px;
 }
 
-.chart-header {
-  margin-bottom: 20px;
+/* Card do gráfico de impacto */
+.chart-card-impact {
+  height: auto;
+  min-height: 650px;
 }
 
-.chart-header h2 {
-  color: #1b4332;
-}
+/* ===== HEADER DOS GRÁFICOS ===== */
 
-.chart-wrapper {
-  position: relative;
-
-  width: 100%;
-
-  height: 280px;
-
-  margin-top: 20px;
-}
-
-#emissionChart {
-  max-height: 280px !important;
-}
-
-/* Header do gráfico com seletor de período */
 .chart-header {
   display: flex;
   justify-content: space-between;
@@ -172,7 +152,8 @@ body {
   color: #1b4332;
 }
 
-/* Seletor de período */
+/* ===== SELETOR DE PERÍODO ===== */
+
 .period-selector {
   display: flex;
   gap: 8px;
@@ -181,7 +162,8 @@ body {
   padding: 4px;
 }
 
-.period-btn {
+.period-btn,
+.impact-btn {
   padding: 8px 16px;
   border: none;
   background: transparent;
@@ -194,13 +176,63 @@ body {
   font-family: inherit;
 }
 
-.period-btn:hover {
+.period-btn:hover,
+.impact-btn:hover {
   background: rgba(45, 106, 79, 0.1);
   color: #2d6a4f;
 }
 
-.period-btn.active {
+.period-btn.active,
+.impact-btn.active {
   background: #2d6a4f;
   color: white;
   box-shadow: 0 2px 8px rgba(45, 106, 79, 0.3);
+}
+
+/* ===== CONTAINER DO GRÁFICO DE EMISSÕES ===== */
+
+.chart-emission-container {
+  position: relative;
+  width: 100%;
+  height: 300px;
+}
+
+#emissionChart {
+  max-height: 300px !important;
+}
+
+/* ===== CONTAINER DO GRÁFICO DE IMPACTO ===== */
+
+.chart-impact-container {
+  position: relative;
+  width: 100%;
+  height: 600px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+/* ===== RESPONSIVO ===== */
+
+@media (max-width: 768px) {
+  .chart-card-emission {
+    height: auto;
+    min-height: 380px;
+  }
+  
+  .chart-card-impact {
+    min-height: 550px;
+  }
+  
+  .chart-emission-container {
+    height: 250px;
+  }
+  
+  .chart-impact-container {
+    height: 480px;
+  }
+  
+  #emissionChart {
+    max-height: 250px !important;
+  }
 }
