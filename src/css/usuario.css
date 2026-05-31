@@ -267,3 +267,110 @@ body {
     text-align: center;
   }
 }
+
+/* ===== INSIGHTS CARD ===== */
+
+.insights-card {
+  background: white;
+  border-radius: 20px;
+  padding: 28px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+  margin-bottom: 24px;
+}
+
+.insights-header {
+  margin-bottom: 20px;
+}
+
+.insights-header h2 {
+  color: #1b4332;
+  margin: 0 0 4px 0;
+  font-size: 1.3rem;
+}
+
+.insights-subtitle {
+  color: #888;
+  font-size: 0.85rem;
+}
+
+/* Container dos cards de insight */
+#insights-container {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+/* Card individual de insight */
+.insight-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 14px;
+  padding: 16px 18px;
+  border-radius: 14px;
+  border-left: 5px solid;
+  background: #fafbfa;
+  transition: transform 0.2s ease;
+}
+
+.insight-item:hover {
+  transform: translateX(4px);
+}
+
+.insight-item.alta {
+  border-left-color: #e07b39;
+  background: #fef9f5;
+}
+
+.insight-item.media {
+  border-left-color: #4a90a4;
+  background: #f5f9fb;
+}
+
+.insight-item.baixa {
+  border-left-color: #81C784;
+  background: #f8fbf8;
+}
+
+.insight-item.positivo {
+  border-left-color: #4CAF50;
+  background: #f5fbf5;
+}
+
+.insight-icon {
+  font-size: 1.8rem;
+  flex-shrink: 0;
+  line-height: 1;
+}
+
+.insight-body {
+  flex: 1;
+}
+
+.insight-title {
+  font-weight: 700;
+  color: #1b4332;
+  font-size: 0.95rem;
+  margin-bottom: 4px;
+}
+
+.insight-message {
+  color: #555;
+  font-size: 0.9rem;
+  line-height: 1.5;
+  margin-bottom: 6px;
+}
+
+.insight-suggestion {
+  color: #2d6a4f;
+  font-size: 0.85rem;
+  font-weight: 500;
+  font-style: italic;
+}
+
+/* Estado vazio */
+.insights-empty {
+  text-align: center;
+  padding: 20px;
+  color: #999;
+  font-style: italic;
+}
