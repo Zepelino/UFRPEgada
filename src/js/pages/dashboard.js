@@ -1,19 +1,31 @@
-console.log("dashboard.js carregado com sucesso!");
+console.log("dashboard.js carregado com sucesso (Versão 2)!");
 
+// ==========================
+// IMPORTAÇÕES
+// ==========================
 import { getUserActivityLogs } from "../services/activityService.js";
+import { getProfile } from "../services/authService.js";
 
+// ==========================
+// ELEMENTOS DO DOM
+// ==========================
 const totalCo2Element = document.getElementById("valor-emissao-total");
 const totalAtividadesElement = document.getElementById("total-atividades-contador");
+const mediaDiariaElement = document.getElementById("media-diaria");
+const ofensivaElement = document.getElementById("ofensiva-atual");
 const listaUltimasAtividades = document.getElementById("dashboard-lista-atividades");
 const seletorData = document.getElementById("filtro-data-diario");
+
+// Variáveis de Estado
 let emissionChart = null;
 let currentPeriod = 'semanal';
 let impactChart = null;
 let currentImpactPeriod = 'semanal';
-
 let todosOsLogs = [];
 
-// ===== EMOJIS =====
+// ==========================
+// FUNÇÕES DE UTILIDADE E UI
+// ==========================
 function obterEmoji(nome) {
   if (!nome) return "🌱";
   if (nome.includes("Banho")) return "🚿";
@@ -22,13 +34,23 @@ function obterEmoji(nome) {
   if (nome.includes("Secador") || nome.includes("Ferro") || nome.includes("Secadora")) return "🔥";
   if (nome.includes("Voo")) return "✈️";
   if (nome.includes("Carro") || nome.includes("Moto") || nome.includes("Ônibus")) return "🚗";
-  if (nome.includes("Plantar") || nome.includes("Árvore")) return "🌲";
+  if (nome.includes("Plantar") || nome.includes("Árvore") || nome.includes("Bicicleta") || nome.includes("Pé") || nome.includes("Sol") || nome.includes("Natural")) return "🌲";
   return "🌱";
 }
 
-// ===== RENDERIZAR O LOG DE UM DIA ESPECÍFICO =====
+function configurarDataHoje() {
+  if (!seletorData) return;
+
+  const hoje = new Date();
+  const ano = hoje.getFullYear();
+  const mes = String(hoje.getMonth() + 1).padStart(2, '0');
+  const dia = String(hoje.getDate()).padStart(2, '0');
+
+  seletorData.value = `${ano}-${mes}-${dia}`;
+}
+
 function renderizarLogDoDia(dataSelecionadaISO) {
-  if (!listaUltimasAtividades) return;
+  if (!listaUltimasAtividades || !dataSelecionadaISO) return;
 
   const [ano, mes, dia] = dataSelecionadaISO.split("-");
   const dataFormatadaBR = `${dia}/${mes}/${ano}`;
@@ -56,9 +78,9 @@ function renderizarLogDoDia(dataSelecionadaISO) {
   const itensHTML = logsDoDia.map(log => {
     const emoji = obterEmoji(log.activity_name);
     return `
-      <div class="activity-item" style="border-bottom: 1px dashed #eee; padding: 10px 5px;">
+      <div class="activity-item" style="border-bottom: 1px dashed #eee; padding: 10px 5px; display: flex; justify-content: space-between;">
           <span>${emoji} ${log.activity_name}</span>
-          <span style="font-size: 0.9em; color: #666;">${log.duration}h (${log.co2_saved} kg emitido)</span>
+          <span style="font-size: 0.9em; color: #666;">${log.duration}h (${log.co2_saved} kg)</span>
       </div>
     `;
   }).join("");
@@ -66,48 +88,78 @@ function renderizarLogDoDia(dataSelecionadaISO) {
   listaUltimasAtividades.innerHTML = resumoDiaHTML + itensHTML;
 }
 
-// ===== CONFIGURAR DATA INICIAL (HOJE) =====
-function configurarDataHoje() {
-  if (!seletorData) return;
-
-  const hoje = new Date();
-  const ano = hoje.getFullYear();
-  const mes = String(hoje.getMonth() + 1).padStart(2, '0');
-  const dia = String(hoje.getDate()).padStart(2, '0');
-
-  seletorData.value = `${ano}-${mes}-${dia}`;
-}
-
-// ===== INICIALIZAR DASHBOARD =====
+// ==========================
+// INICIALIZAÇÃO PRINCIPAL DO DASHBOARD
+// ==========================
 async function inicializarDashboard() {
-  configurarDataHoje();
-  todosOsLogs = await getUserActivityLogs();
+  try {
+    configurarDataHoje();
+    
+    // Busca os dados simultaneamente (Deixa a tela mais rápida)
+    const [logsResult, perfilResult] = await Promise.all([
+      getUserActivityLogs(),
+      getProfile()
+    ]);
 
-  if (!todosOsLogs || todosOsLogs.length === 0) {
-    if (totalCo2Element) totalCo2Element.innerText = "0.00 kg CO₂";
-    if (totalAtividadesElement) totalAtividadesElement.innerText = "0";
-    if (listaUltimasAtividades) {
-      listaUltimasAtividades.innerHTML = '<p style="color: #666; padding: 10px;">Nenhum registro encontrado no sistema.</p>';
+    todosOsLogs = logsResult || [];
+    const dadosPerfil = perfilResult;
+
+    // 1. Atualiza a Ofensiva (Streak)
+    if (dadosPerfil && ofensivaElement) {
+      ofensivaElement.innerText = `${dadosPerfil.profile.streak || 0} dias 🔥`;
     }
-    return;
+
+    // 2. Validação de estado vazio
+    if (todosOsLogs.length === 0) {
+      if (totalCo2Element) totalCo2Element.innerText = "0.00 kg CO₂";
+      if (totalAtividadesElement) totalAtividadesElement.innerText = "0";
+      if (mediaDiariaElement) mediaDiariaElement.innerText = "0.00 kg/dia";
+      if (listaUltimasAtividades) {
+        listaUltimasAtividades.innerHTML = '<p style="color: #666; padding: 10px;">Nenhum registro encontrado no sistema.</p>';
+      }
+      return;
+    }
+
+    // 3. Cálculo das Métricas Gerais
+    const somaCo2Geral = todosOsLogs.reduce((total, log) => total + parseFloat(log.co2_saved), 0);
+    const quantidadeAtividadesGeral = todosOsLogs.length;
+    
+    // Calcula Média Diária
+    const diasUnicos = new Set(todosOsLogs.map(log => log.date)).size;
+    const mediaDiaria = somaCo2Geral / (diasUnicos || 1);
+
+    if (totalCo2Element) totalCo2Element.innerText = `${somaCo2Geral.toFixed(2)} kg CO₂`;
+    if (totalAtividadesElement) totalAtividadesElement.innerText = quantidadeAtividadesGeral;
+    if (mediaDiariaElement) mediaDiariaElement.innerText = `${mediaDiaria.toFixed(2)} kg/dia`;
+
+    if (seletorData && seletorData.value) {
+      renderizarLogDoDia(seletorData.value);
+    }
+    
+    // 4. Setup dos Gráficos
+    setupPeriodSelector();
+    setupImpactPeriodSelector();
+    carregarGrafico('semanal');
+    carregarGraficoImpacto('semanal');
+
+  } catch (erro) {
+    console.error("Erro crítico ao carregar o Dashboard:", erro);
+    if (listaUltimasAtividades) {
+      listaUltimasAtividades.innerHTML = `<p style="color: red; padding: 10px;">Erro ao carregar dados. Detalhe no console.</p>`;
+    }
   }
-
-  const somaCo2Geral = todosOsLogs.reduce((total, log) => total + parseFloat(log.co2_saved), 0);
-  const quantidadeAtividadesGeral = todosOsLogs.length;
-
-  if (totalCo2Element) totalCo2Element.innerText = `${somaCo2Geral.toFixed(2)} kg CO₂`;
-  if (totalAtividadesElement) totalAtividadesElement.innerText = quantidadeAtividadesGeral;
-
-  renderizarLogDoDia(seletorData.value);
-  
-  // Setup dos botões e carregar gráfico inicial
-  setupPeriodSelector();
-  setupImpactPeriodSelector();
-  carregarGrafico('semanal');
-  carregarGraficoImpacto('semanal');
 }
 
-// ===== SETUP DOS BOTÕES DE PERÍODO DO GRÁFICO DE IMPACTO =====
+// Listener para o filtro de data do Log Diário
+if (seletorData) {
+  seletorData.addEventListener("change", (e) => {
+    renderizarLogDoDia(e.target.value);
+  });
+}
+
+// ==========================
+// LÓGICA DO GRÁFICO DE IMPACTO (POLAR)
+// ==========================
 function setupImpactPeriodSelector() {
   const impactButtons = document.querySelectorAll('.impact-btn');
   if (!impactButtons.length) return;
@@ -123,13 +175,11 @@ function setupImpactPeriodSelector() {
   });
 }
 
-// ===== CARREGAR GRÁFICO DE IMPACTO =====
 function carregarGraficoImpacto(periodo) {
   const dadosAgrupados = agruparAtividadesPorImpacto(periodo);
   renderizarGraficoRosa(dadosAgrupados);
 }
 
-// ===== AGRUPAR ATIVIDADES POR IMPACTO =====
 function agruparAtividadesPorImpacto(periodo) {
   const hoje = new Date();
   let dataInicio;
@@ -145,39 +195,29 @@ function agruparAtividadesPorImpacto(periodo) {
     dataInicio.setFullYear(dataInicio.getFullYear() - 1);
   }
   
-  // Filtrar logs pelo período
   const logsFiltrados = todosOsLogs.filter(log => {
     const [dia, mes, ano] = log.date.split("/");
     const dataLog = new Date(`${ano}-${mes}-${dia}`);
     return dataLog >= dataInicio && dataLog <= hoje;
   });
   
-  // Agrupar por atividade
   const atividadesMap = {};
   
   logsFiltrados.forEach(log => {
     const nome = log.activity_name || 'Outros';
     if (!atividadesMap[nome]) {
-      atividadesMap[nome] = {
-        nome: nome,
-        co2Total: 0,
-        horasTotal: 0,
-        count: 0
-      };
+      atividadesMap[nome] = { nome: nome, co2Total: 0, horasTotal: 0, count: 0 };
     }
     atividadesMap[nome].co2Total += parseFloat(log.co2_saved || 0);
     atividadesMap[nome].horasTotal += parseFloat(log.duration || 0);
     atividadesMap[nome].count++;
   });
   
-  // Converter para array e ordenar por impacto (maior primeiro)
   let atividadesArray = Object.values(atividadesMap);
   atividadesArray.sort((a, b) => b.co2Total - a.co2Total);
   
-  // Pegar as 8 mais impactantes
   const top8 = atividadesArray.slice(0, 8);
   
-  // Se tiver mais atividades, agrupar o resto como "Outras"
   if (atividadesArray.length > 8) {
     const outras = atividadesArray.slice(8);
     const outrasAgrupadas = {
@@ -192,26 +232,13 @@ function agruparAtividadesPorImpacto(periodo) {
   return top8;
 }
 
-// ===== RENDERIZAR GRÁFICO ROSA (NIGHTINGALE ROSE) =====
 function renderizarGraficoRosa(dados) {
   const ctx = document.getElementById("impactChart");
   if (!ctx) return;
+  if (impactChart) impactChart.destroy();
   
-  if (impactChart) {
-    impactChart.destroy();
-  }
-  
-  const cores = [
-    '#2d6a4f', '#e07b39', '#4a90a4', '#8e44ad',
-    '#c44569', '#3b82f6', '#e67e22', '#16a085',
-    '#d4a017',
-  ];
-  
-  const labels = dados.map(d => {
-    const emoji = obterEmoji(d.nome);
-    return `${emoji} ${d.nome}`;
-  });
-  
+  const cores = ['#2d6a4f', '#e07b39', '#4a90a4', '#8e44ad', '#c44569', '#3b82f6', '#e67e22', '#16a085', '#d4a017'];
+  const labels = dados.map(d => `${obterEmoji(d.nome)} ${d.nome}`);
   const valores = dados.map(d => d.co2Total);
   const horas = dados.map(d => d.horasTotal);
   
@@ -232,164 +259,87 @@ function renderizarGraficoRosa(dados) {
     options: {
       responsive: true,
       maintainAspectRatio: false,
-      layout: {
-        padding: {
-          top: 20,
-          bottom: 20,
-          left: 10,
-          right: 10
-        }
-      },
+      layout: { padding: { top: 20, bottom: 20, left: 10, right: 10 } },
       plugins: {
         legend: {
           position: 'right',
           align: 'center',
           maxWidth: 220,
           labels: {
-            color: '#333',
-            font: {
-              size: 13
-            },
-            padding: 14,
-            usePointStyle: true,
-            pointStyle: 'circle',
-            boxWidth: 12,
-            boxHeight: 12,
+            color: '#333', font: { size: 13 }, padding: 14, usePointStyle: true, pointStyle: 'circle',
             generateLabels: function(chart) {
               const data = chart.data;
               return data.labels.map((label, i) => ({
-                text: label,
-                fillStyle: data.datasets[0].backgroundColor[i],
-                strokeStyle: data.datasets[0].borderColor[i],
-                lineWidth: 2,
-                hidden: false,
-                index: i,
-                pointStyle: 'circle'
+                text: label, fillStyle: data.datasets[0].backgroundColor[i], strokeStyle: data.datasets[0].borderColor[i],
+                lineWidth: 2, hidden: false, index: i, pointStyle: 'circle'
               }));
             }
           }
         },
         tooltip: {
-          backgroundColor: "#1b4332",
-          titleColor: "#fff",
-          bodyColor: "#fff",
-          padding: 14,
-          cornerRadius: 10,
+          backgroundColor: "#1b4332", titleColor: "#fff", bodyColor: "#fff", padding: 14, cornerRadius: 10,
           callbacks: {
             label: function(context) {
               const horaItem = horas[context.dataIndex];
-              const valor = valores[context.dataIndex];
-              return [
-                `CO₂: ${valor.toFixed(2)} kg`,
-                `Tempo: ${horaItem.toFixed(1)}h`,
-              ];
+              return [`CO₂: ${valores[context.dataIndex].toFixed(2)} kg`, `Tempo: ${horaItem.toFixed(1)}h`];
             }
           }
         }
       },
       scales: {
         r: {
-          beginAtZero: true,
-          suggestedMax: Math.max(...valores) * 1.25,
-          ticks: {
-            display: true,
-            backdropColor: 'transparent',
-            color: '#999',
-            font: {
-              size: 10
-            },
-            count: 4,
-            callback: function(value) {
-              return value.toFixed(1) + ' kg';
-            }
-          },
-          grid: {
-            color: 'rgba(0,0,0,0.05)',
-            circular: true
-          },
-          angleLines: {
-            color: 'rgba(0,0,0,0.05)'
-          },
-          pointLabels: {
-            display: false,
-          }
+          beginAtZero: true, suggestedMax: Math.max(...valores) * 1.25,
+          ticks: { display: true, backdropColor: 'transparent', color: '#999', font: { size: 10 }, count: 4, callback: value => value.toFixed(1) + ' kg' },
+          grid: { color: 'rgba(0,0,0,0.05)', circular: true },
+          angleLines: { color: 'rgba(0,0,0,0.05)' },
+          pointLabels: { display: false }
         }
       }
     }
   });
 }
 
-// ===== LISTENER PARA DATA =====
-if (seletorData) {
-  seletorData.addEventListener("change", (e) => {
-    renderizarLogDoDia(e.target.value);
-  });
-}
-
-// ===== SETUP DOS BOTÕES DE PERÍODO =====
+// ==========================
+// LÓGICA DO GRÁFICO DE LINHA (EMISSÕES)
+// ==========================
 function setupPeriodSelector() {
   const periodButtons = document.querySelectorAll('.period-btn');
   if (!periodButtons.length) return;
   
   periodButtons.forEach(button => {
     button.addEventListener('click', async () => {
-      // Remove active de todos
       periodButtons.forEach(btn => btn.classList.remove('active'));
-      
-      // Adiciona active no clicado
       button.classList.add('active');
-      
-      // Atualiza período atual
       currentPeriod = button.dataset.period;
-      
-      // Recarrega o gráfico
       carregarGrafico(currentPeriod);
     });
   });
 }
 
-// ===== CARREGAR GRÁFICO CONFORME PERÍODO =====
 function carregarGrafico(periodo) {
-  if (periodo === 'semanal') {
-    renderizarGraficoSemanal();
-  } else if (periodo === 'mensal') {
-    renderizarGraficoMensal();
-  } else if (periodo === 'anual') {
-    renderizarGraficoAnual();
-  }
+  if (periodo === 'semanal') renderizarGraficoSemanal();
+  else if (periodo === 'mensal') renderizarGraficoMensal();
+  else if (periodo === 'anual') renderizarGraficoAnual();
 }
 
-// ===== GRÁFICO SEMANAL (ÚLTIMOS 7 DIAS) =====
 function renderizarGraficoSemanal() {
   const diasSemana = ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb'];
-  const labels = [];
-  const valores = [];
+  const labels = [], valores = [];
   
   for (let i = 6; i >= 0; i--) {
     const data = new Date();
     data.setDate(data.getDate() - i);
-    
     const dia = String(data.getDate()).padStart(2, "0");
     const mes = String(data.getMonth() + 1).padStart(2, "0");
-    const dataBR = `${dia}/${mes}/${data.getFullYear()}`;
     
-    const nomeDia = diasSemana[data.getDay()];
-    labels.push(`${nomeDia} (${dia}/${mes})`);
-    
-    const logsDia = todosOsLogs.filter(log => log.date === dataBR);
-    const totalDia = logsDia.reduce((acc, log) => acc + parseFloat(log.co2_saved), 0);
-    valores.push(totalDia);
+    labels.push(`${diasSemana[data.getDay()]} (${dia}/${mes})`);
+    valores.push(todosOsLogs.filter(log => log.date === `${dia}/${mes}/${data.getFullYear()}`).reduce((acc, log) => acc + parseFloat(log.co2_saved), 0));
   }
-  
   renderizarGrafico(labels, valores, '#2d6a4f', 'Dia', 'CO₂ (kg)');
 }
 
-// ===== GRÁFICO MENSAL (ÚLTIMAS 4 SEMANAS) =====
 function renderizarGraficoMensal() {
-  const labels = [];
-  const valores = [];
-  const tooltipsInfo = []; // Array para guardar info completa do tooltip
-  
+  const labels = [], valores = [], tooltipsInfo = []; 
   const hoje = new Date();
   
   for (let i = 3; i >= 0; i--) {
@@ -398,320 +348,104 @@ function renderizarGraficoMensal() {
     const fimSemana = new Date(hoje);
     fimSemana.setDate(hoje.getDate() - (i * 7));
     
-    // Formatar datas da semana
     const inicioDia = String(inicioSemana.getDate()).padStart(2, '0');
     const inicioMes = String(inicioSemana.getMonth() + 1).padStart(2, '0');
     const fimDia = String(fimSemana.getDate()).padStart(2, '0');
     const fimMes = String(fimSemana.getMonth() + 1).padStart(2, '0');
     
-    // Label enxuta para o eixo
-    let rotulo;
-    // Tooltip completo
-    let tooltipCompleto;
+    labels.push(i === 0 ? 'Sem. atual' : `${i} sem. atrás`);
+    tooltipsInfo.push(`${i === 0 ? 'Semana atual' : i + ' semana(s) atrás'} (${inicioDia}/${inicioMes} - ${fimDia}/${fimMes})`);
     
-    if (i === 0) {
-      rotulo = 'Sem. atual';
-      tooltipCompleto = `Semana atual (${inicioDia}/${inicioMes} - ${fimDia}/${fimMes})`;
-    } else if (i === 1) {
-      rotulo = '1 sem. atrás';
-      tooltipCompleto = `1 semana atrás (${inicioDia}/${inicioMes} - ${fimDia}/${fimMes})`;
-    } else if (i === 2) {
-      rotulo = '2 sem. atrás';
-      tooltipCompleto = `2 semanas atrás (${inicioDia}/${inicioMes} - ${fimDia}/${fimMes})`;
-    } else {
-      rotulo = '3 sem. atrás';
-      tooltipCompleto = `3 semanas atrás (${inicioDia}/${inicioMes} - ${fimDia}/${fimMes})`;
-    }
-    
-    labels.push(rotulo);
-    tooltipsInfo.push(tooltipCompleto);
-    
-    const totalSemana = todosOsLogs.reduce((acc, log) => {
+    valores.push(todosOsLogs.reduce((acc, log) => {
       const [dia, mes, ano] = log.date.split("/");
       const dataLog = new Date(`${ano}-${mes}-${dia}`);
-      if (dataLog >= inicioSemana && dataLog <= fimSemana) {
-        return acc + parseFloat(log.co2_saved);
-      }
-      return acc;
-    }, 0);
-    
-    valores.push(totalSemana);
+      return (dataLog >= inicioSemana && dataLog <= fimSemana) ? acc + parseFloat(log.co2_saved) : acc;
+    }, 0));
   }
-  
   renderizarGraficoMensalComTooltips(labels, valores, '#40916c', 'Período', 'CO₂ (kg)', tooltipsInfo);
 }
 
-// ===== RENDERIZAR GRÁFICO MENSAL COM TOOLTIPS PERSONALIZADOS =====
 function renderizarGraficoMensalComTooltips(labels, valores, cor, eixoX, eixoY, tooltipsInfo) {
   const ctx = document.getElementById("emissionChart");
   if (!ctx) return;
-  
-  if (emissionChart) {
-    emissionChart.destroy();
-  }
+  if (emissionChart) emissionChart.destroy();
   
   emissionChart = new Chart(ctx, {
     type: "line",
     data: {
       labels: labels,
       datasets: [{
-        label: "kg CO₂",
-        data: valores,
-        borderColor: cor,
-        backgroundColor: cor + "1F",
-        fill: "origin",
-        tension: 0.45,
-        cubicInterpolationMode: 'monotone',
-        borderWidth: 3,
-        pointRadius: 5,
-        pointHoverRadius: 7,
-        pointBackgroundColor: "#ffffff",
-        pointBorderColor: cor,
-        pointBorderWidth: 3
+        label: "kg CO₂", data: valores, borderColor: cor, backgroundColor: cor + "1F", fill: "origin", tension: 0.45,
+        cubicInterpolationMode: 'monotone', borderWidth: 3, pointRadius: 5, pointHoverRadius: 7, pointBackgroundColor: "#ffffff", pointBorderColor: cor, pointBorderWidth: 3
       }]
     },
     options: {
-      layout: {
-        padding: {
-          top: 10,
-          right: 20,
-          bottom: 10,
-          left: 10
-        }
-      },
-      responsive: true,
-      maintainAspectRatio: false,
-      interaction: {
-        intersect: false,
-        mode: "index"
-      },
+      layout: { padding: { top: 10, right: 20, bottom: 10, left: 10 } }, responsive: true, maintainAspectRatio: false, interaction: { intersect: false, mode: "index" },
       plugins: {
-        legend: {
-          display: true,
-          position: 'top',
-          labels: {
-            color: '#333',
-            font: {
-              size: 12,
-              weight: 'bold'
-            },
-            usePointStyle: true,
-            pointStyle: 'circle'
-          }
-        },
+        legend: { display: true, position: 'top', labels: { color: '#333', font: { size: 12, weight: 'bold' }, usePointStyle: true, pointStyle: 'circle' } },
         tooltip: {
-          backgroundColor: "#1b4332",
-          titleColor: "#fff",
-          bodyColor: "#fff",
-          padding: 12,
-          displayColors: false,
-          cornerRadius: 10,
+          backgroundColor: "#1b4332", titleColor: "#fff", bodyColor: "#fff", padding: 12, displayColors: false, cornerRadius: 10,
           callbacks: {
-            title: function(context) {
-              // Mostra a info completa no título do tooltip
-              const index = context[0].dataIndex;
-              return tooltipsInfo[index] || context[0].label;
-            },
-            label: function(context) {
-              return `${context.parsed.y.toFixed(2)} kg CO₂`;
-            }
+            title: context => tooltipsInfo[context[0].dataIndex] || context[0].label,
+            label: context => `${context.parsed.y.toFixed(2)} kg CO₂`
           }
         }
       },
       scales: {
-        x: {
-          title: {
-            display: true,
-            text: eixoX,
-            color: '#1b4332',
-            font: {
-              size: 13,
-              weight: 'bold'
-            }
-          },
-          grid: {
-            display: false
-          },
-          ticks: {
-            color: "#666",
-            maxRotation: 0,
-            minRotation: 0
-          }
-        },
-        y: {
-          beginAtZero: true,
-          title: {
-            display: true,
-            text: eixoY,
-            color: '#1b4332',
-            font: {
-              size: 13,
-              weight: 'bold'
-            }
-          },
-          grid: {
-            color: "rgba(0,0,0,0.05)"
-          },
-          ticks: {
-            color: "#666",
-            callback: function(value) {
-              return value.toFixed(1);
-            }
-          }
-        }
+        x: { title: { display: true, text: eixoX, color: '#1b4332', font: { size: 13, weight: 'bold' } }, grid: { display: false }, ticks: { color: "#666", maxRotation: 0, minRotation: 0 } },
+        y: { beginAtZero: true, title: { display: true, text: eixoY, color: '#1b4332', font: { size: 13, weight: 'bold' } }, grid: { color: "rgba(0,0,0,0.05)" }, ticks: { color: "#666", callback: value => value.toFixed(1) } }
       }
     }
   });
 }
 
-// ===== GRÁFICO ANUAL (ÚLTIMOS 12 MESES) =====
 function renderizarGraficoAnual() {
   const meses = ['Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun', 'Jul', 'Ago', 'Set', 'Out', 'Nov', 'Dez'];
-  const labels = [];
-  const valores = [];
-  
-  const hoje = new Date();
-  const anoAtual = hoje.getFullYear();
-  const mesAtual = hoje.getMonth();
+  const labels = [], valores = [];
+  const hoje = new Date(), anoAtual = hoje.getFullYear(), mesAtual = hoje.getMonth();
   
   for (let i = 11; i >= 0; i--) {
     const mes = (mesAtual - i + 12) % 12;
     const ano = mesAtual - i < 0 ? anoAtual - 1 : anoAtual;
-    
     labels.push(`${meses[mes]}/${ano}`);
     
-    const totalMes = todosOsLogs.reduce((acc, log) => {
+    valores.push(todosOsLogs.reduce((acc, log) => {
       const [dia, mesLog, anoLog] = log.date.split("/");
-      if (parseInt(mesLog) - 1 === mes && parseInt(anoLog) === ano) {
-        return acc + parseFloat(log.co2_saved);
-      }
-      return acc;
-    }, 0);
-    
-    valores.push(totalMes);
+      return (parseInt(mesLog) - 1 === mes && parseInt(anoLog) === ano) ? acc + parseFloat(log.co2_saved) : acc;
+    }, 0));
   }
-  
   renderizarGrafico(labels, valores, '#52b788', 'Mês/Ano', 'CO₂ (kg)');
 }
 
-// ===== RENDERIZAR GRÁFICO GENÉRICO =====
 function renderizarGrafico(labels, valores, cor, eixoX = '', eixoY = '') {
   const ctx = document.getElementById("emissionChart");
   if (!ctx) return;
-  
-  // Destruir gráfico anterior se existir
-  if (emissionChart) {
-    emissionChart.destroy();
-  }
+  if (emissionChart) emissionChart.destroy();
   
   emissionChart = new Chart(ctx, {
     type: "line",
     data: {
       labels: labels,
       datasets: [{
-        label: "kg CO₂",
-        data: valores,
-        borderColor: cor,
-        backgroundColor: cor + "1F",
-        fill: "origin",
-        tension: 0.45,
-        cubicInterpolationMode: 'monotone',
-        borderWidth: 3,
-        pointRadius: 5,
-        pointHoverRadius: 7,
-        pointBackgroundColor: "#ffffff",
-        pointBorderColor: cor,
-        pointBorderWidth: 3
+        label: "kg CO₂", data: valores, borderColor: cor, backgroundColor: cor + "1F", fill: "origin", tension: 0.45,
+        cubicInterpolationMode: 'monotone', borderWidth: 3, pointRadius: 5, pointHoverRadius: 7, pointBackgroundColor: "#ffffff", pointBorderColor: cor, pointBorderWidth: 3
       }]
     },
     options: {
-      layout: {
-        padding: {
-          top: 10,
-          right: 20,
-          bottom: 10,
-          left: 10
-        }
-      },
-      responsive: true,
-      maintainAspectRatio: false,
-      interaction: {
-        intersect: false,
-        mode: "index"
-      },
+      layout: { padding: { top: 10, right: 20, bottom: 10, left: 10 } }, responsive: true, maintainAspectRatio: false, interaction: { intersect: false, mode: "index" },
       plugins: {
-        legend: {
-          display: true,
-          position: 'top',
-          labels: {
-            color: '#333',
-            font: {
-              size: 12,
-              weight: 'bold'
-            },
-            usePointStyle: true,
-            pointStyle: 'circle'
-          }
-        },
-        tooltip: {
-          backgroundColor: "#1b4332",
-          titleColor: "#fff",
-          bodyColor: "#fff",
-          padding: 12,
-          displayColors: false,
-          cornerRadius: 10,
-          callbacks: {
-            label: function(context) {
-              return `${context.parsed.y.toFixed(2)} kg CO₂`;
-            }
-          }
-        }
+        legend: { display: true, position: 'top', labels: { color: '#333', font: { size: 12, weight: 'bold' }, usePointStyle: true, pointStyle: 'circle' } },
+        tooltip: { backgroundColor: "#1b4332", titleColor: "#fff", bodyColor: "#fff", padding: 12, displayColors: false, cornerRadius: 10, callbacks: { label: context => `${context.parsed.y.toFixed(2)} kg CO₂` } }
       },
       scales: {
-        x: {
-          title: {
-            display: true,
-            text: eixoX,
-            color: '#1b4332',
-            font: {
-              size: 13,
-              weight: 'bold'
-            }
-          },
-          grid: {
-            display: false
-          },
-          ticks: {
-            color: "#666",
-            maxRotation: 45,
-            minRotation: 0
-          }
-        },
-        y: {
-          beginAtZero: true,
-          title: {
-            display: true,
-            text: eixoY,
-            color: '#1b4332',
-            font: {
-              size: 13,
-              weight: 'bold'
-            }
-          },
-          grid: {
-            color: "rgba(0,0,0,0.05)"
-          },
-          ticks: {
-            color: "#666",
-            callback: function(value) {
-              return value.toFixed(1);
-            }
-          }
-        }
+        x: { title: { display: true, text: eixoX, color: '#1b4332', font: { size: 13, weight: 'bold' } }, grid: { display: false }, ticks: { color: "#666", maxRotation: 45, minRotation: 0 } },
+        y: { beginAtZero: true, title: { display: true, text: eixoY, color: '#1b4332', font: { size: 13, weight: 'bold' } }, grid: { color: "rgba(0,0,0,0.05)" }, ticks: { color: "#666", callback: value => value.toFixed(1) } }
       }
     }
   });
 }
 
-// INICIAR
+// ==========================
+// BOOTSTRAP
+// ==========================
 inicializarDashboard();

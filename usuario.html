@@ -6,83 +6,234 @@
 
     <title>Usuário | UFRPEgada</title>
 
-    <link
-      rel="icon"
-      href="src/assets/imagens/UFRPEgada_LOGO.png"
-      type="image/png"
-    />
-
+    <link rel="icon" href="src/assets/imagens/UFRPEgada_LOGO.png" type="image/png" />
     <link rel="stylesheet" href="src/css/global.css" />
     <link rel="stylesheet" href="src/css/usuario.css" />
+
+    <!-- ESTILOS EXCLUSIVOS DA BARRA DE XP E MODAL -->
+    <style>
+      /* NOVAS BADGES DE ESTATÍSTICAS */
+      .profile-stats {
+        display: flex;
+        gap: 10px;
+        margin-top: 12px;
+        flex-wrap: wrap;
+      }
+      .stat-badge {
+        background-color: #e6ebe6;
+        color: #2e5932;
+        padding: 5px 12px;
+        border-radius: 20px;
+        font-size: 0.85rem;
+        font-weight: 600;
+        display: flex;
+        align-items: center;
+        gap: 6px;
+      }
+
+      /* BARRA DE XP */
+      .profile-info-xp {
+        margin-top: 25px;
+        padding: 20px;
+        background: #f9fbf9;
+        border-radius: 10px;
+        border: 1px solid #e0e5e0;
+      }
+      .xp-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 12px;
+      }
+      .level-name {
+        font-weight: bold;
+        font-size: 1.15rem;
+      }
+      .btn-info-xp {
+        background: none;
+        border: 1.5px solid #4CAF50;
+        color: #4CAF50;
+        padding: 5px 12px;
+        border-radius: 20px;
+        cursor: pointer;
+        font-size: 0.85rem;
+        font-weight: bold;
+        transition: all 0.2s ease;
+      }
+      .btn-info-xp:hover {
+        background: #4CAF50;
+        color: white;
+      }
+      .xp-bar-background {
+        width: 100%;
+        height: 12px;
+        background-color: #e6ebe6;
+        border-radius: 10px;
+        overflow: hidden;
+        margin-bottom: 8px;
+      }
+      .xp-bar-fill {
+        height: 100%;
+        width: 0%;
+        background: linear-gradient(90deg, #4CAF50, #8bc34a);
+        border-radius: 10px;
+        transition: width 1s ease-in-out;
+      }
+      .xp-footer {
+        display: flex;
+        justify-content: space-between;
+        font-size: 0.85rem;
+        color: #666;
+      }
+      
+      /* MODAL DE EXTRATO */
+      .modal {
+        position: fixed;
+        top: 0; left: 0; width: 100%; height: 100%;
+        background: rgba(0, 0, 0, 0.5);
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        z-index: 1000;
+        opacity: 1;
+        transition: opacity 0.3s ease;
+      }
+      .modal.hidden {
+        display: none;
+        opacity: 0;
+      }
+      .modal-content {
+        background: white;
+        padding: 25px;
+        border-radius: 12px;
+        width: 90%;
+        max-width: 400px;
+        max-height: 80vh;
+        overflow-y: auto;
+        box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+      }
+      .modal-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        border-bottom: 1px solid #eee;
+        padding-bottom: 15px;
+        margin-bottom: 15px;
+      }
+      .modal-header h2 {
+        margin: 0;
+        font-size: 1.25rem;
+        color: #2e5932;
+      }
+      .close-btn {
+        background: none;
+        border: none;
+        font-size: 1.8rem;
+        line-height: 1;
+        cursor: pointer;
+        color: #888;
+        transition: color 0.2s;
+      }
+      .close-btn:hover {
+        color: #333;
+      }
+      .xp-history-item {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 12px 0;
+        border-bottom: 1px dashed #eee;
+      }
+      .xp-history-item:last-child {
+        border-bottom: none;
+      }
+      .xp-history-details {
+        display: flex;
+        flex-direction: column;
+      }
+      .xp-history-title {
+        font-weight: bold;
+        font-size: 0.95rem;
+        color: #333;
+      }
+      .xp-history-date {
+        font-size: 0.8rem;
+        color: #777;
+        margin-top: 2px;
+      }
+      .xp-points {
+        font-weight: bold;
+        color: #4CAF50;
+        font-size: 1.05rem;
+      }
+    </style>
   </head>
 
   <body>
     <!-- ===== HEADER ===== -->
-
     <header class="topbar">
       <h1>UFRPEgada</h1>
-
       <nav>
         <a href="dashboard.html">Dashboard</a>
         <a href="atividades.html">Atividades</a>
-
         <button id="logout-btn">Sair</button>
       </nav>
     </header>
 
     <!-- ===== MAIN ===== -->
-
     <main class="profile-container">
+      
       <!-- ===== PERFIL ===== -->
-
       <section class="profile-card">
         <div class="profile-header">
           <div class="avatar" id="user-avatar">J</div>
-
           <div>
             <h2 id="user-name">Carregando...</h2>
-
             <p id="user-email">Carregando...</p>
+            
+            <!-- AQUI ESTÃO AS NOVAS BADGES DE INFORMAÇÃO -->
+            <div class="profile-stats">
+              <div class="stat-badge" title="Dias seguidos registrando">
+                🔥 <span id="user-streak">0</span> dias
+              </div>
+              <div class="stat-badge" title="Total de atividades registradas">
+                📝 <span id="user-activities">0</span> atividades
+              </div>
+              <div class="stat-badge" title="Pontuação total acumulada">
+                ⭐ <span id="user-total-score">0</span> pts
+              </div>
+            </div>
+            
           </div>
         </div>
 
-        <!-- ===== INFO ===== -->
-
-        <div class="profile-info">
-          <div class="info-card">
-            <h3>Pontuação Verde</h3>
-
-            <p id="user-score">0 pts</p>
+        <!-- ===== BARRA DE XP ===== -->
+        <div class="profile-info-xp">
+          <div class="xp-header">
+            <span id="user-level-name" class="level-name">Carregando Nível...</span>
+            <button id="btn-historico-xp" class="btn-info-xp" title="Ver Histórico de XP">
+              ℹ️ Extrato de XP
+            </button>
           </div>
-
-          <div class="info-card">
-            <h3>Atividades Registradas</h3>
-
-            <p id="user-activities">0</p>
+          <div class="xp-bar-background">
+            <div class="xp-bar-fill" id="xp-bar-fill"></div>
           </div>
-
-          <div class="info-card">
-            <h3>Nível Sustentável</h3>
-
-            <p id="user-level">Eco Iniciante</p>
+          <div class="xp-footer">
+            <span id="xp-text">0 / 0 XP</span>
+            <span id="xp-hint">Calculando...</span>
           </div>
         </div>
       </section>
 
       <!-- ===== HISTÓRICO ===== -->
-
       <section class="activities-section">
         <div class="section-title">
           <h2>Histórico de Atividades</h2>
         </div>
 
-        <!-- cards serão renderizados aqui -->
-
         <div id="activity-container">
           <!-- cards dinâmicos -->
         </div>
-
-        <!-- estado vazio -->
 
         <div id="empty-state" class="empty-state hidden">
           <p>Nenhuma atividade registrada ainda 🌱</p>
@@ -90,6 +241,20 @@
       </section>
     </main>
 
-    <script type="module" src="./src/js/modules/usuario.js"></script>
+    <!-- ===== MODAL EXTRATO DE XP ===== -->
+    <div id="xp-modal" class="modal hidden">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h2>Extrato de XP</h2>
+          <button id="close-modal" class="close-btn">&times;</button>
+        </div>
+        <div class="modal-body" id="xp-history-list">
+          <p style="text-align:center; color:#666;">Carregando histórico...</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Script com Cache Buster v4! -->
+    <script type="module" src="./src/js/modules/usuario.js?v=4"></script>
   </body>
 </html>

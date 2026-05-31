@@ -63,56 +63,68 @@ export async function registerActivity(activityId, duration) {
 
   if (!user) {
     console.error("Não foi possível registrar: usuário não autenticado.");
-    throw new Error("Usuário não autenticado");
+    return;
   }
 
+  // 1. Puxar o perfil atual do usuário e a atividade escolhida
+  const { data: profile } = await supabase.from("profiles").select("*").eq("id", user.id).single();
+  const { data: activity } = await supabase.from("activities").select("consumo_por_hora").eq("id", activityId).single();
+
+  // 2. Cálculo Base de XP
+  let xpGanho = 5; // Todo registro vale pelo menos 5 pontos pelo esforço
+  if (activity && activity.consumo_por_hora === 0) {
+    xpGanho += 20; // Bônus pesado para opções zero emissão (Bicicleta, Caminhada, etc)
+  }
+
+  // 3. Lógica de Tempo e Streak (Ofensiva)
+  const hoje = new Date();
+  // Formata a data para salvar no padrão do Supabase (YYYY-MM-DD)
+  const dataHojeString = hoje.getFullYear() + "-" + String(hoje.getMonth() + 1).padStart(2, '0') + "-" + String(hoje.getDate()).padStart(2, '0');
+  
+  let novoStreak = profile.streak || 0;
+  let xpExtraStreak = 0;
+
+  if (profile.ultima_atividade) {
+    // Mesma lógica de tratamento de data para evitar fusos diferentes
+    const [ano, mes, dia] = profile.ultima_atividade.split('-');
+    const ultima = new Date(ano, mes - 1, dia); 
+    
+    hoje.setHours(0,0,0,0);
+    ultima.setHours(0,0,0,0);
+    
+    const diffTime = hoje - ultima;
+    const diffDays = Math.round(diffTime / (1000 * 60 * 60 * 24));
+
+    if (diffDays === 1) {
+      novoStreak += 1; // Registrou no dia seguinte, aumenta a ofensiva
+      if (novoStreak % 3 === 0) xpExtraStreak = 50; // A cada 3 dias seguidos, ganha +50 XP bônus!
+    } else if (diffDays > 1) {
+      novoStreak = 1; // Quebrou a ofensiva, volta para o dia 1
+    }
+    // Se diffDays === 0, ele já registrou algo hoje. Apenas mantemos o streak e não damos bônus de streak.
+  } else {
+    novoStreak = 1; // Primeiro registro da conta
+  }
+
+  const xpTotalAtualizado = (profile.pegada_total || 0) + xpGanho + xpExtraStreak;
+
+  // 4. Salvar a atividade no histórico
   const inicio = new Date();
   const fim = new Date(inicio.getTime() + duration * 60 * 60 * 1000);
 
-  const { data, error } = await supabase.from("activity_logs").insert([
-    {
-      user_id: user.id,
-      activity_id: activityId,
-      inicio: inicio.toISOString(),
-      fim: fim.toISOString(),
-    },
-  ]).select(`
-    *,
-    activities (
-      descricao,
-      consumo_por_hora
-    )
-  `).single();
+  await supabase.from("activity_logs").insert([{
+    user_id: user.id,
+    activity_id: activityId,
+    inicio: inicio.toISOString(),
+    fim: fim.toISOString(),
+  }]);
 
-  if (error) {
-    console.error("Erro ao inserir atividade:", error);
-    throw new Error(error.message || "Erro ao registrar atividade");
-  }
-
-  // Buscar informações da atividade para calcular CO2
-  let consumoPorHora = 0;
-  let descricao = "Atividade";
-  
-  if (data.activities) {
-    const atividade = Array.isArray(data.activities) 
-      ? data.activities[0] 
-      : data.activities;
-    
-    consumoPorHora = atividade?.consumo_por_hora || 0;
-    descricao = atividade?.descricao || "Atividade";
-  }
-
-  // Calcular CO2 emitido
-  const co2_emitted = duration * consumoPorHora;
-
-  // Retornar dados completos para o frontend
-  return {
-    success: true,
-    co2_emitted: co2_emitted,
-    activity_name: descricao,
-    duration: duration,
-    data: data
-  };
+  // 5. Atualizar o Perfil com os novos XP, Streak e Data
+  await supabase.from("profiles").update({
+    pegada_total: xpTotalAtualizado,
+    streak: novoStreak,
+    ultima_atividade: dataHojeString
+  }).eq("id", user.id);
 }
 
 // ==========================
