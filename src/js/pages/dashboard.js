@@ -232,13 +232,29 @@ function agruparAtividadesPorImpacto(periodo) {
   return top8;
 }
 
+// ===== RENDERIZAR GRÁFICO NIGHTINGALE ROSE =====
 function renderizarGraficoRosa(dados) {
   const ctx = document.getElementById("impactChart");
   if (!ctx) return;
-  if (impactChart) impactChart.destroy();
   
-  const cores = ['#2d6a4f', '#e07b39', '#4a90a4', '#8e44ad', '#c44569', '#3b82f6', '#e67e22', '#16a085', '#d4a017'];
-  const labels = dados.map(d => `${obterEmoji(d.nome)} ${d.nome}`);
+  if (impactChart) {
+    impactChart.destroy();
+  }
+  
+  // Detectar se é mobile (retrato)
+  const isMobile = window.innerWidth <= 768;
+  
+  const cores = [
+    '#2d6a4f', '#e07b39', '#4a90a4', '#8e44ad',
+    '#c44569', '#3b82f6', '#e67e22', '#16a085',
+    '#d4a017',
+  ];
+  
+  const labels = dados.map(d => {
+    const emoji = obterEmoji(d.nome);
+    return isMobile ? `${emoji}` : `${emoji} ${d.nome}`;
+  });
+  
   const valores = dados.map(d => d.co2Total);
   const horas = dados.map(d => d.horasTotal);
   
@@ -259,40 +275,95 @@ function renderizarGraficoRosa(dados) {
     options: {
       responsive: true,
       maintainAspectRatio: false,
-      layout: { padding: { top: 20, bottom: 20, left: 10, right: 10 } },
+      layout: {
+        padding: {
+          top: 20,
+          bottom: 20,
+          left: 10,
+          right: 10
+        }
+      },
       plugins: {
         legend: {
-          position: 'right',
+          position: isMobile ? 'bottom' : 'right',
           align: 'center',
-          maxWidth: 220,
+          maxWidth: isMobile ? undefined : 220,
           labels: {
-            color: '#333', font: { size: 13 }, padding: 14, usePointStyle: true, pointStyle: 'circle',
+            color: '#333',
+            font: {
+              size: isMobile ? 11 : 13
+            },
+            padding: isMobile ? 10 : 14,
+            usePointStyle: true,
+            pointStyle: 'circle',
+            boxWidth: isMobile ? 10 : 12,
+            boxHeight: isMobile ? 10 : 12,
             generateLabels: function(chart) {
               const data = chart.data;
-              return data.labels.map((label, i) => ({
-                text: label, fillStyle: data.datasets[0].backgroundColor[i], strokeStyle: data.datasets[0].borderColor[i],
-                lineWidth: 2, hidden: false, index: i, pointStyle: 'circle'
-              }));
+              return data.labels.map((label, i) => {
+                const texto = isMobile ?
+                  `${label} ${dados[i].nome} (${valores[i].toFixed(1)} kg)` :
+                  label;
+                return {
+                  text: texto,
+                  fillStyle: data.datasets[0].backgroundColor[i],
+                  strokeStyle: data.datasets[0].borderColor[i],
+                  lineWidth: 2,
+                  hidden: false,
+                  index: i,
+                  pointStyle: 'circle'
+                };
+              });
             }
           }
         },
         tooltip: {
-          backgroundColor: "#1b4332", titleColor: "#fff", bodyColor: "#fff", padding: 14, cornerRadius: 10,
+          backgroundColor: "#1b4332",
+          titleColor: "#fff",
+          bodyColor: "#fff",
+          padding: 14,
+          cornerRadius: 10,
           callbacks: {
+            title: function(context) {
+              return `${context[0].label} ${dados[context[0].dataIndex].nome}`;
+            },
             label: function(context) {
               const horaItem = horas[context.dataIndex];
-              return [`CO₂: ${valores[context.dataIndex].toFixed(2)} kg`, `Tempo: ${horaItem.toFixed(1)}h`];
+              const valor = valores[context.dataIndex];
+              return [
+                `CO₂: ${valor.toFixed(2)} kg`,
+                `Tempo: ${horaItem.toFixed(1)}h`,
+              ];
             }
           }
         }
       },
       scales: {
         r: {
-          beginAtZero: true, suggestedMax: Math.max(...valores) * 1.25,
-          ticks: { display: true, backdropColor: 'transparent', color: '#999', font: { size: 10 }, count: 4, callback: value => value.toFixed(1) + ' kg' },
-          grid: { color: 'rgba(0,0,0,0.05)', circular: true },
-          angleLines: { color: 'rgba(0,0,0,0.05)' },
-          pointLabels: { display: false }
+          beginAtZero: true,
+          suggestedMax: Math.max(...valores) * 1.25,
+          ticks: {
+            display: true,
+            backdropColor: 'transparent',
+            color: '#999',
+            font: {
+              size: 10
+            },
+            count: 4,
+            callback: function(value) {
+              return value.toFixed(1) + ' kg';
+            }
+          },
+          grid: {
+            color: 'rgba(0,0,0,0.05)',
+            circular: true
+          },
+          angleLines: {
+            color: 'rgba(0,0,0,0.05)'
+          },
+          pointLabels: {
+            display: false,
+          }
         }
       }
     }
@@ -444,6 +515,17 @@ function renderizarGrafico(labels, valores, cor, eixoX = '', eixoY = '') {
     }
   });
 }
+
+// Recriar gráfico ao redimensionar a tela
+let resizeTimeout;
+window.addEventListener('resize', () => {
+  clearTimeout(resizeTimeout);
+  resizeTimeout = setTimeout(() => {
+    if (currentImpactPeriod) {
+      carregarGraficoImpacto(currentImpactPeriod);
+    }
+  }, 300);
+});
 
 // ==========================
 // BOOTSTRAP

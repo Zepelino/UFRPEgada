@@ -214,6 +214,18 @@ body {
 
 /* ===== RESPONSIVO ===== */
 
+/* Tablet e desktop pequeno */
+@media (max-width: 1024px) {
+  .chart-impact-container {
+    height: 500px;
+  }
+  
+  .chart-card-impact {
+    min-height: 550px;
+  }
+}
+
+/* Modo retrato (celular) */
 @media (max-width: 768px) {
   .chart-card-emission {
     height: auto;
@@ -221,7 +233,7 @@ body {
   }
   
   .chart-card-impact {
-    min-height: 550px;
+    min-height: 650px;
   }
   
   .chart-emission-container {
@@ -229,10 +241,21 @@ body {
   }
   
   .chart-impact-container {
-    height: 480px;
+    height: 520px;
   }
   
   #emissionChart {
     max-height: 250px !important;
+  }
+}
+
+/* tela menor */
+@media (max-width: 480px) {
+  .chart-card-impact {
+    min-height: 600px;
+  }
+  
+  .chart-impact-container {
+    height: 480px;
   }
 }
