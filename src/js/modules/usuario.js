@@ -1,12 +1,8 @@
-console.log("usuario.js carregado com sucesso (Versão 4 - Com Badges)!");
+console.log("usuario.js carregado com sucesso (Versão 7 - Botão de Regras/Elos)!");
 
 // Importando os serviços
-import { getProfile } from "../services/authService.js";
+import { getProfile, getLeaderboard } from "../services/authService.js";
 import { getUserActivityLogs } from "../services/activityService.js";
-
-// Elementos Atividades
-const containerAtividade = document.getElementById("activity-container");
-const emptyState = document.getElementById("empty-state");
 
 // Elementos Gamificação e Badges
 const levelName = document.getElementById("user-level-name");
@@ -18,11 +14,22 @@ const streakBadge = document.getElementById("user-streak");
 const activitiesBadge = document.getElementById("user-activities");
 const scoreBadge = document.getElementById("user-total-score");
 
-// Elementos Modal
+// Elementos Modal Extrato
 const modal = document.getElementById("xp-modal");
 const btnAbrirModal = document.getElementById("btn-historico-xp");
 const btnFecharModal = document.getElementById("close-modal");
 const listaXP = document.getElementById("xp-history-list");
+
+// Elementos Modal Leaderboard
+const modalLeaderboard = document.getElementById("leaderboard-modal");
+const btnAbrirLeaderboard = document.getElementById("btn-leaderboard");
+const btnFecharLeaderboard = document.getElementById("close-leaderboard");
+const listaLeaderboard = document.getElementById("leaderboard-list");
+
+// Elementos Modal Regras
+const modalRegras = document.getElementById("regras-modal");
+const btnAbrirRegras = document.getElementById("btn-info-regras");
+const btnFecharRegras = document.getElementById("close-regras");
 
 // ===== EMOJIS =====
 function obterEmoji(nome) {
@@ -35,46 +42,6 @@ function obterEmoji(nome) {
   if (nome.includes("Carro") || nome.includes("Moto") || nome.includes("Ônibus")) return "🚗";
   if (nome.includes("Plantar") || nome.includes("Árvore") || nome.includes("Bicicleta") || nome.includes("Pé")) return "🌲";
   return "🌱";
-}
-
-// ===== CRIAR CARD COM O VISUAL ORIGINAL =====
-function criarCardAtividade(log) {
-  const emoji = obterEmoji(log.activity_name);
-
-  return `
-    <div class="activity-card">
-      <div class="activity-header">
-        <span class="activity-title">
-          ${emoji} ${log.activity_name}
-        </span>
-        <span class="activity-duration">
-          ${log.duration}h
-        </span>
-      </div>
-      <div class="activity-info">
-        <p>
-          CO₂ emitido: <strong>${log.co2_saved}kg</strong>
-        </p>
-        <p class="activity-date">
-          ${log.date}
-        </p>
-      </div>
-    </div>
-  `;
-}
-
-// ===== RENDERIZAR CARDS =====
-function renderizarCardAtividade(logs) {
-  if (!containerAtividade) return;
-
-  if (logs.length === 0) {
-    if (emptyState) emptyState.classList.remove("hidden");
-    containerAtividade.innerHTML = "";
-    return;
-  }
-
-  if (emptyState) emptyState.classList.add("hidden");
-  containerAtividade.innerHTML = logs.map(criarCardAtividade).join("");
 }
 
 // ===== MATEMÁTICA DE NÍVEL E XP =====
@@ -99,7 +66,6 @@ function calcularProgressoXP(xpTotal) {
     }
   }
 
-  // Teto máximo
   if (xpTotal >= 2500) {
     return { nivel: niveis[5], porcentagem: 100, atual: xpTotal, max: "MAX", faltam: 0 };
   }
@@ -126,10 +92,9 @@ function preencherModalXP(logs) {
     return;
   }
 
-  // Gera o histórico simulando os ganhos com base na emissão
   const html = logs.map(log => {
     const isZeroCarbon = parseFloat(log.co2_saved) === 0;
-    const pontos = isZeroCarbon ? 25 : 5; // 25 pra zero emissão, 5 base
+    const pontos = isZeroCarbon ? 25 : 5;
     const motivo = isZeroCarbon ? "Emissão Zero 🌿" : "Registro de Rotina 📝";
     
     return `
@@ -146,22 +111,76 @@ function preencherModalXP(logs) {
   listaXP.innerHTML = html;
 }
 
-// ===== EVENTOS DO MODAL =====
+// ===== PREENCHER LEADERBOARD =====
+async function preencherLeaderboard() {
+  if (!listaLeaderboard) return;
+  
+  const jogadores = await getLeaderboard();
+
+  if (!jogadores || jogadores.length === 0) {
+    listaLeaderboard.innerHTML = "<p style='text-align:center; color:#666;'>Nenhum jogador encontrado no ranking.</p>";
+    return;
+  }
+
+  const html = jogadores.map((jogador, index) => {
+    let medalha = `${index + 1}º`;
+    if (index === 0) medalha = "🥇";
+    else if (index === 1) medalha = "🥈";
+    else if (index === 2) medalha = "🥉";
+
+    // Usa a função para pegar a cor e o nome do Elo do Jogador
+    const infoNivel = calcularProgressoXP(jogador.pegada_total || 0).nivel;
+
+    return `
+      <div class="xp-history-item">
+        <div style="display:flex; align-items:center; gap: 15px;">
+          <span style="font-size: 1.5rem; font-weight: bold; width: 35px; text-align: center; color: #555;">${medalha}</span>
+          <div class="xp-history-details">
+            <span class="xp-history-title">${jogador.nome || "Anônimo"}</span>
+            <span class="xp-history-date" style="color: ${infoNivel.cor}; font-weight: 600;">${infoNivel.nome}</span>
+          </div>
+        </div>
+        <span class="xp-points" style="color: ${infoNivel.cor};">${jogador.pegada_total || 0} pts</span>
+      </div>
+    `;
+  }).join("");
+
+  listaLeaderboard.innerHTML = html;
+}
+
+// ===== EVENTOS DOS MODAIS =====
+
+// Extrato
 if (btnAbrirModal) btnAbrirModal.addEventListener("click", () => modal.classList.remove("hidden"));
 if (btnFecharModal) btnFecharModal.addEventListener("click", () => modal.classList.add("hidden"));
-// Fechar clicando fora da caixa
+
+// Leaderboard
+if (btnAbrirLeaderboard) {
+  btnAbrirLeaderboard.addEventListener("click", () => {
+    modalLeaderboard.classList.remove("hidden");
+    if(listaLeaderboard.innerHTML.includes("Carregando")) preencherLeaderboard();
+  });
+}
+if (btnFecharLeaderboard) btnFecharLeaderboard.addEventListener("click", () => modalLeaderboard.classList.add("hidden"));
+
+// Regras e Elos
+if (btnAbrirRegras) btnAbrirRegras.addEventListener("click", () => modalRegras.classList.remove("hidden"));
+if (btnFecharRegras) btnFecharRegras.addEventListener("click", () => modalRegras.classList.add("hidden"));
+
+
+// Fechar clicando fora da caixa de qualquer um deles
 window.addEventListener("click", (e) => {
   if (e.target === modal) modal.classList.add("hidden");
+  if (e.target === modalLeaderboard) modalLeaderboard.classList.add("hidden");
+  if (e.target === modalRegras) modalRegras.classList.add("hidden");
 });
 
 // ===== INICIALIZAR PÁGINA =====
 async function carregarPagina() {
   try {
-    // 1. Puxar Dados do Supabase
     const dadosPerfil = await getProfile();
-    const logs = await getUserActivityLogs();
+    const logs = await getUserActivityLogs(); // Ainda precisamos dos logs para o extrato e os insights
 
-    // 2. Preencher Perfil Básico e Badges
     if (dadosPerfil) {
       const { user, profile } = dadosPerfil;
       document.getElementById("user-name").textContent = profile.nome;
@@ -171,13 +190,11 @@ async function carregarPagina() {
         document.getElementById("user-avatar").textContent = profile.nome[0].toUpperCase();
       }
 
-      // Preenche as Badges (Pílulas)
       const xpTotal = profile.pegada_total || 0;
       if (streakBadge) streakBadge.textContent = profile.streak || 0;
       if (scoreBadge) scoreBadge.textContent = xpTotal;
       if (activitiesBadge) activitiesBadge.textContent = logs.length || 0;
 
-      // 3. Atualizar Barra de XP
       const progresso = calcularProgressoXP(xpTotal);
       
       if (levelName) {
@@ -186,7 +203,6 @@ async function carregarPagina() {
       }
       
       if (xpBarFill) {
-        // Um pequeno delay para a barra encher animada após a tela carregar
         setTimeout(() => {
           xpBarFill.style.width = `${progresso.porcentagem}%`;
           xpBarFill.style.background = progresso.nivel.cor;
@@ -201,11 +217,9 @@ async function carregarPagina() {
       }
     }
 
-    // 4. Renderizar Atividades e Modal
-    renderizarCardAtividade(logs);
     preencherModalXP(logs);
     
-    // 5. Renderizar Insights
+    // Insights dos colegas!
     const insights = gerarInsights(logs);
     renderizarInsights(insights);
 
@@ -214,14 +228,11 @@ async function carregarPagina() {
   }
 }
 
-// ===== SISTEMA DE INSIGHTS =====
-
+// ===== SISTEMA DE INSIGHTS (INTACTO) =====
 function gerarInsights(logs) {
-    if (!logs || logs.length < 3) return []; // Precisa de dados mínimos
+    if (!logs || logs.length < 3) return []; 
     
     const resultados = [];
-    
-    // 1. Atividade dominante
     const grupos = agruparPorAtividade(logs);
     const totalCO2 = grupos.reduce((s, g) => s + g.co2, 0);
     
@@ -240,7 +251,6 @@ function gerarInsights(logs) {
         }
     }
     
-    // 2. Frequência de atividades positivas
     const temPositivas = logs.some(log => 
         ['Plantar', 'Árvore', 'Bicicleta', 'Pé'].some(p => log.activity_name.includes(p))
     );
@@ -255,7 +265,6 @@ function gerarInsights(logs) {
         });
     }
     
-    // 3. Dia mais intenso
     const porDia = agruparPorDiaSemana(logs);
     const diasComDados = porDia.filter(d => d.total > 0);
     
@@ -275,19 +284,12 @@ function gerarInsights(logs) {
         }
     }
     
-    // 4. Atividades com duração excessiva
     for (const grupo of grupos) {
         const duracaoMedia = grupo.duracaoTotal / grupo.contagem;
         
         const limites = {
-            'Banho': 0.5,
-            'Desktop': 5,
-            'Gamer': 4,
-            'Notebook': 5,
-            'Ar-condicionado': 8,
-            'Secador': 0.3,
-            'Ferro': 0.5,
-            'Secadora': 1.5
+            'Banho': 0.5, 'Desktop': 5, 'Gamer': 4, 'Notebook': 5,
+            'Ar-condicionado': 8, 'Secador': 0.3, 'Ferro': 0.5, 'Secadora': 1.5
         };
         
         const limite = Object.entries(limites).find(([k]) => grupo.nome.includes(k));
@@ -300,11 +302,10 @@ function gerarInsights(logs) {
                 mensagem: `Média de ${duracaoMedia.toFixed(1)}h por sessão.`,
                 sugestao: `Tente reduzir para cerca de ${limite[1]}h. Pequenas pausas fazem diferença.`
             });
-            break; // Só uma dessa
+            break; 
         }
     }
     
-    // Limitar a 3 insights
     return resultados.slice(0, 3);
 }
 

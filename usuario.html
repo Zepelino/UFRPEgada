@@ -31,7 +31,7 @@
         gap: 6px;
       }
 
-      /* BARRA DE XP */
+      /* BARRA DE XP E ÍCONE DE INFO */
       .profile-info-xp {
         margin-top: 25px;
         padding: 20px;
@@ -44,10 +44,31 @@
         justify-content: space-between;
         align-items: center;
         margin-bottom: 12px;
+        flex-wrap: wrap;
+        gap: 10px;
       }
       .level-name {
         font-weight: bold;
         font-size: 1.15rem;
+      }
+      .info-icon-badge {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 22px;
+        height: 22px;
+        background-color: #e6ebe6;
+        color: #555;
+        border-radius: 50%;
+        font-size: 0.8rem;
+        margin-left: 8px;
+        cursor: pointer;
+        transition: all 0.2s;
+      }
+      .info-icon-badge:hover {
+        background-color: #d0d8d0;
+        color: #2e5932;
+        transform: scale(1.1);
       }
       .btn-info-xp {
         background: none;
@@ -86,7 +107,7 @@
         color: #666;
       }
       
-      /* MODAL DE EXTRATO */
+      /* MODAL GENÉRICO */
       .modal {
         position: fixed;
         top: 0; left: 0; width: 100%; height: 100%;
@@ -166,6 +187,41 @@
         color: #4CAF50;
         font-size: 1.05rem;
       }
+
+      /* ESTILOS INTERNOS DO MODAL DE REGRAS */
+      .regras-section {
+        margin-bottom: 20px;
+      }
+      .regras-section h3 {
+        font-size: 1.05rem;
+        color: #2e5932;
+        margin-bottom: 10px;
+        border-bottom: 1px solid #eee;
+        padding-bottom: 5px;
+      }
+      .regras-list {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+        font-size: 0.9rem;
+        color: #444;
+      }
+      .regras-list li {
+        margin-bottom: 10px;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+      }
+      .elo-badge {
+        display: inline-block;
+        padding: 4px 10px;
+        border-radius: 12px;
+        font-size: 0.8rem;
+        font-weight: bold;
+        color: white;
+        min-width: 130px;
+        text-align: center;
+      }
     </style>
   </head>
 
@@ -191,7 +247,6 @@
             <h2 id="user-name">Carregando...</h2>
             <p id="user-email">Carregando...</p>
             
-            <!-- AQUI ESTÃO AS NOVAS BADGES DE INFORMAÇÃO -->
             <div class="profile-stats">
               <div class="stat-badge" title="Dias seguidos registrando">
                 🔥 <span id="user-streak">0</span> dias
@@ -210,10 +265,18 @@
         <!-- ===== BARRA DE XP ===== -->
         <div class="profile-info-xp">
           <div class="xp-header">
-            <span id="user-level-name" class="level-name">Carregando Nível...</span>
-            <button id="btn-historico-xp" class="btn-info-xp" title="Ver Histórico de XP">
-              ℹ️ Extrato de XP
-            </button>
+            <div style="display: flex; align-items: center;">
+              <span id="user-level-name" class="level-name">Carregando Nível...</span>
+              <span id="btn-info-regras" class="info-icon-badge" title="Como funciona o XP e os Elos?">❓</span>
+            </div>
+            <div style="display: flex; gap: 8px;">
+              <button id="btn-historico-xp" class="btn-info-xp" title="Ver Histórico de XP">
+                ℹ️ Extrato
+              </button>
+              <button id="btn-leaderboard" class="btn-info-xp" style="border-color: #FFB300; color: #FFB300;" title="Ver Ranking Global">
+                🏆 Ranking
+              </button>
+            </div>
           </div>
           <div class="xp-bar-background">
             <div class="xp-bar-fill" id="xp-bar-fill"></div>
@@ -236,20 +299,6 @@
         </div>
       </section>
 
-      <!-- ===== HISTÓRICO ===== -->
-      <section class="activities-section">
-        <div class="section-title">
-          <h2>Histórico de Atividades</h2>
-        </div>
-
-        <div id="activity-container">
-          <!-- cards dinâmicos -->
-        </div>
-
-        <div id="empty-state" class="empty-state hidden">
-          <p>Nenhuma atividade registrada ainda 🌱</p>
-        </div>
-      </section>
     </main>
 
     <!-- ===== MODAL EXTRATO DE XP ===== -->
@@ -265,7 +314,60 @@
       </div>
     </div>
 
-    <!-- Script com Cache Buster v4! -->
-    <script type="module" src="./src/js/modules/usuario.js?v=4"></script>
+    <!-- ===== MODAL LEADERBOARD (RANKING) ===== -->
+    <div id="leaderboard-modal" class="modal hidden">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h2>🏆 Top 10 UFRPEgada</h2>
+          <button id="close-leaderboard" class="close-btn">&times;</button>
+        </div>
+        <div class="modal-body" id="leaderboard-list">
+          <p style="text-align:center; color:#666;">Carregando ranking...</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- ===== MODAL REGRAS E ELOS ===== -->
+    <div id="regras-modal" class="modal hidden">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h2>Regras e Níveis</h2>
+          <button id="close-regras" class="close-btn">&times;</button>
+        </div>
+        <div class="modal-body">
+          
+          <div class="regras-section">
+            <h3>📈 Como ganhar pontos?</h3>
+            <ul class="regras-list" style="display: block;">
+              <li style="margin-bottom: 8px;"><span>🌿</span> <strong>+25 pts:</strong> Atividades de emissão zero (Bicicleta, Plantar, etc).</li>
+              <li><span>📝</span> <strong>+5 pts:</strong> Registro padrão de rotina.</li>
+            </ul>
+          </div>
+          
+          <div class="regras-section">
+            <h3>📉 Penalidade de Inatividade</h3>
+            <ul class="regras-list" style="display: block;">
+              <li><span>⚠️</span> <strong>-5 pts por dia:</strong> Caso fique mais de 3 dias sem registrar nada, você perde pontos a cada dia extra e zera sua Ofensiva 🔥.</li>
+            </ul>
+          </div>
+
+          <div class="regras-section">
+            <h3>🏆 Tabela de Níveis</h3>
+            <ul class="regras-list">
+              <li><span class="elo-badge" style="background-color: #9E9E9E;">Eco Iniciante</span> 0 a 99 pts</li>
+              <li><span class="elo-badge" style="background-color: #81C784;">Eco Aprendiz</span> 100 a 349 pts</li>
+              <li><span class="elo-badge" style="background-color: #4CAF50;">Eco Praticante</span> 350 a 799 pts</li>
+              <li><span class="elo-badge" style="background-color: #388E3C;">Eco Especialista</span> 800 a 1499 pts</li>
+              <li><span class="elo-badge" style="background-color: #00695C;">Eco Embaixador</span> 1500 a 2499 pts</li>
+              <li><span class="elo-badge" style="background-color: #FFB300;">Mestre Sustentável</span> 2500+ pts</li>
+            </ul>
+          </div>
+
+        </div>
+      </div>
+    </div>
+
+    <!-- Script com Cache Buster v7! -->
+    <script type="module" src="./src/js/modules/usuario.js?v=7"></script>
   </body>
 </html>
