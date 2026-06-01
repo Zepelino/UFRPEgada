@@ -1,7 +1,7 @@
 console.log("usuario.js carregado com sucesso (Versão 7 - Botão de Regras/Elos)!");
 
 // Importando os serviços
-import { getProfile, getLeaderboard } from "../services/authService.js";
+import { getProfile, getLeaderboard, logout } from "../services/authService.js";
 import { getUserActivityLogs } from "../services/activityService.js";
 
 // Elementos Gamificação e Badges
@@ -17,6 +17,7 @@ const scoreCard = document.getElementById("user-score-card");
 const rankingPosition = document.getElementById("user-ranking-position");
 const rankingTotal = document.getElementById("user-ranking-total");
 const rankingCardBtn = document.getElementById("ranking-card-btn");
+const logoutBtn = document.getElementById("logout-btn");
 
 // Elementos Modal Extrato
 const modal = document.getElementById("xp-modal");
@@ -187,6 +188,14 @@ window.addEventListener("click", (e) => {
   if (e.target === modalLeaderboard) modalLeaderboard.classList.add("hidden");
   if (e.target === modalRegras) modalRegras.classList.add("hidden");
 });
+
+//logout
+if (logoutBtn) {
+  logoutBtn.addEventListener("click", async () => {
+    await logout();
+    window.location.href = "index.html";
+  });
+}
 
 // ===== INICIALIZAR PÁGINA =====
 async function carregarPagina() {

@@ -6,6 +6,7 @@ console.log("dashboard.js carregado com sucesso (Versão 2)!");
 import { getUserActivityLogs } from "../services/activityService.js";
 import { getProfile } from "../services/authService.js";
 
+
 // ==========================
 // ELEMENTOS DO DOM
 // ==========================
@@ -15,6 +16,7 @@ const mediaDiariaElement = document.getElementById("media-diaria");
 const ofensivaElement = document.getElementById("ofensiva-atual");
 const listaUltimasAtividades = document.getElementById("dashboard-lista-atividades");
 const seletorData = document.getElementById("filtro-data-diario");
+const btnLogout = document.getElementById("btn-logout");
 
 // Variáveis de Estado
 let emissionChart = null;
