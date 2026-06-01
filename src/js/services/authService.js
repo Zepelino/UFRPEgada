@@ -105,12 +105,10 @@ export async function getProfile() {
 
 // BUSCAR RANKING GLOBAL (LEADERBOARD)
 export async function getLeaderboard() {
-  // Puxa os 10 maiores pontuadores do Supabase
   const { data, error } = await supabase
     .from("profiles")
-    .select("nome, pegada_total")
+    .select("id, nome, pegada_total")
     .order("pegada_total", { ascending: false })
-    .limit(10);
 
   if (error) {
     console.error("Erro ao buscar Leaderboard:", error);

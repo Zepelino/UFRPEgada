@@ -10,9 +10,13 @@ const xpBarFill = document.getElementById("xp-bar-fill");
 const xpText = document.getElementById("xp-text");
 const xpHint = document.getElementById("xp-hint");
 
-const streakBadge = document.getElementById("user-streak");
-const activitiesBadge = document.getElementById("user-activities");
-const scoreBadge = document.getElementById("user-total-score");
+const streakCard = document.getElementById("user-streak-card");
+const activitiesCard = document.getElementById("user-activities-card");
+const scoreCard = document.getElementById("user-score-card");
+
+const rankingPosition = document.getElementById("user-ranking-position");
+const rankingTotal = document.getElementById("user-ranking-total");
+const rankingCardBtn = document.getElementById("ranking-card-btn");
 
 // Elementos Modal Extrato
 const modal = document.getElementById("xp-modal");
@@ -86,7 +90,7 @@ function calcularProgressoXP(xpTotal) {
 // ===== PREENCHER MODAL DE EXTRATO =====
 function preencherModalXP(logs) {
   if (!listaXP) return;
-  
+
   if (logs.length === 0) {
     listaXP.innerHTML = "<p style='text-align:center; color:#666;'>Nenhum XP ganho ainda.</p>";
     return;
@@ -96,7 +100,7 @@ function preencherModalXP(logs) {
     const isZeroCarbon = parseFloat(log.co2_saved) === 0;
     const pontos = isZeroCarbon ? 25 : 5;
     const motivo = isZeroCarbon ? "Emissão Zero 🌿" : "Registro de Rotina 📝";
-    
+
     return `
       <div class="xp-history-item">
         <div class="xp-history-details">
@@ -114,7 +118,7 @@ function preencherModalXP(logs) {
 // ===== PREENCHER LEADERBOARD =====
 async function preencherLeaderboard() {
   if (!listaLeaderboard) return;
-  
+
   const jogadores = await getLeaderboard();
 
   if (!jogadores || jogadores.length === 0) {
@@ -150,16 +154,25 @@ async function preencherLeaderboard() {
 
 // ===== EVENTOS DOS MODAIS =====
 
+function abrirRanking() {
+  modalLeaderboard.classList.remove("hidden");
+
+  if (listaLeaderboard.innerHTML.includes("Carregando")) {
+    preencherLeaderboard();
+  }
+}
+
 // Extrato
 if (btnAbrirModal) btnAbrirModal.addEventListener("click", () => modal.classList.remove("hidden"));
 if (btnFecharModal) btnFecharModal.addEventListener("click", () => modal.classList.add("hidden"));
 
 // Leaderboard
 if (btnAbrirLeaderboard) {
-  btnAbrirLeaderboard.addEventListener("click", () => {
-    modalLeaderboard.classList.remove("hidden");
-    if(listaLeaderboard.innerHTML.includes("Carregando")) preencherLeaderboard();
-  });
+  btnAbrirLeaderboard.addEventListener("click", abrirRanking);
+}
+
+if (rankingCardBtn) {
+  rankingCardBtn.addEventListener("click", abrirRanking);
 }
 if (btnFecharLeaderboard) btnFecharLeaderboard.addEventListener("click", () => modalLeaderboard.classList.add("hidden"));
 
@@ -185,23 +198,31 @@ async function carregarPagina() {
       const { user, profile } = dadosPerfil;
       document.getElementById("user-name").textContent = profile.nome;
       document.getElementById("user-email").textContent = user.email;
-      
+
       if (profile.nome) {
         document.getElementById("user-avatar").textContent = profile.nome[0].toUpperCase();
       }
 
+      const leaderboard = await getLeaderboard();
+      
+      console.log("Primeiro jogador:", leaderboard[0]);
+      console.log("User:", user);
+
       const xpTotal = profile.pegada_total || 0;
-      if (streakBadge) streakBadge.textContent = profile.streak || 0;
-      if (scoreBadge) scoreBadge.textContent = xpTotal;
-      if (activitiesBadge) activitiesBadge.textContent = logs.length || 0;
+      const streak = profile.streak || 0;
+      const totalActivities = logs.length || 0;
+
+      if (streakCard) streakCard.textContent = `${streak} dias`;
+      if (scoreCard) scoreCard.textContent = `${xpTotal} pts`;
+      if (activitiesCard) activitiesCard.textContent = totalActivities;
 
       const progresso = calcularProgressoXP(xpTotal);
-      
+
       if (levelName) {
         levelName.textContent = progresso.nivel.nome;
         levelName.style.color = progresso.nivel.cor;
       }
-      
+
       if (xpBarFill) {
         setTimeout(() => {
           xpBarFill.style.width = `${progresso.porcentagem}%`;
@@ -209,16 +230,31 @@ async function carregarPagina() {
         }, 300);
       }
 
+      if (leaderboard && rankingPosition && rankingTotal) {
+
+        const posicao = leaderboard.findIndex(
+          jogador => jogador.id === user.id
+        ) + 1;
+
+        if (posicao > 0) {
+          rankingPosition.textContent = `${posicao}º`;
+          rankingTotal.textContent = `entre ${leaderboard.length} usuários`;
+        } else {
+          rankingPosition.textContent = "--";
+          rankingTotal.textContent = "posição indisponível";
+        }
+      }
+
       if (xpText) xpText.textContent = `${progresso.atual} / ${progresso.max} XP`;
       if (xpHint) {
-        xpHint.textContent = progresso.max === "MAX" 
-          ? "Você atingiu o nível máximo!" 
+        xpHint.textContent = progresso.max === "MAX"
+          ? "Você atingiu o nível máximo!"
           : `Faltam ${progresso.faltam} XP para o próximo nível.`;
       }
     }
 
     preencherModalXP(logs);
-    
+
     // Insights dos colegas!
     const insights = gerarInsights(logs);
     renderizarInsights(insights);
@@ -230,198 +266,198 @@ async function carregarPagina() {
 
 // ===== SISTEMA DE INSIGHTS (INTACTO) =====
 function gerarInsights(logs) {
-    if (!logs || logs.length < 3) return []; 
-    
-    const resultados = [];
-    const grupos = agruparPorAtividade(logs);
-    const totalCO2 = grupos.reduce((s, g) => s + g.co2, 0);
-    
-    if (grupos.length > 0 && totalCO2 > 0) {
-        const maior = grupos.sort((a, b) => b.co2 - a.co2)[0];
-        const porcentagem = (maior.co2 / totalCO2) * 100;
-        
-        if (porcentagem > 25) {
-            resultados.push({
-                tipo: porcentagem > 45 ? 'alta' : 'media',
-                icone: obterEmoji(maior.nome),
-                titulo: `${maior.nome} é seu maior impacto`,
-                mensagem: `Representa ${porcentagem.toFixed(0)}% das suas emissões totais.`,
-                sugestao: obterSugestaoAtividade(maior.nome, porcentagem, maior.duracaoTotal / maior.contagem)
-            });
-        }
+  if (!logs || logs.length < 3) return [];
+
+  const resultados = [];
+  const grupos = agruparPorAtividade(logs);
+  const totalCO2 = grupos.reduce((s, g) => s + g.co2, 0);
+
+  if (grupos.length > 0 && totalCO2 > 0) {
+    const maior = grupos.sort((a, b) => b.co2 - a.co2)[0];
+    const porcentagem = (maior.co2 / totalCO2) * 100;
+
+    if (porcentagem > 25) {
+      resultados.push({
+        tipo: porcentagem > 45 ? 'alta' : 'media',
+        icone: obterEmoji(maior.nome),
+        titulo: `${maior.nome} é seu maior impacto`,
+        mensagem: `Representa ${porcentagem.toFixed(0)}% das suas emissões totais.`,
+        sugestao: obterSugestaoAtividade(maior.nome, porcentagem, maior.duracaoTotal / maior.contagem)
+      });
     }
-    
-    const temPositivas = logs.some(log => 
-        ['Plantar', 'Árvore', 'Bicicleta', 'Pé'].some(p => log.activity_name.includes(p))
-    );
-    
-    if (!temPositivas && logs.length > 5) {
-        resultados.push({
-            tipo: 'baixa',
-            icone: '🌱',
-            titulo: 'Que tal ações positivas?',
-            mensagem: 'Você registra emissões, mas nenhuma atividade que compensa seu impacto.',
-            sugestao: 'Plantar árvores ou usar bicicleta ajudam a equilibrar sua pegada ecológica.'
-        });
+  }
+
+  const temPositivas = logs.some(log =>
+    ['Plantar', 'Árvore', 'Bicicleta', 'Pé'].some(p => log.activity_name.includes(p))
+  );
+
+  if (!temPositivas && logs.length > 5) {
+    resultados.push({
+      tipo: 'baixa',
+      icone: '🌱',
+      titulo: 'Que tal ações positivas?',
+      mensagem: 'Você registra emissões, mas nenhuma atividade que compensa seu impacto.',
+      sugestao: 'Plantar árvores ou usar bicicleta ajudam a equilibrar sua pegada ecológica.'
+    });
+  }
+
+  const porDia = agruparPorDiaSemana(logs);
+  const diasComDados = porDia.filter(d => d.total > 0);
+
+  if (diasComDados.length >= 3) {
+    const media = diasComDados.reduce((s, d) => s + d.total, 0) / diasComDados.length;
+    const piorDia = diasComDados.sort((a, b) => b.total - a.total)[0];
+
+    if (piorDia.total > media * 1.4) {
+      const acima = ((piorDia.total / media - 1) * 100).toFixed(0);
+      resultados.push({
+        tipo: 'media',
+        icone: '📅',
+        titulo: `${piorDia.nome} é seu dia mais intenso`,
+        mensagem: `Emite ${acima}% mais que sua média diária.`,
+        sugestao: 'Tente distribuir melhor suas atividades ao longo da semana.'
+      });
     }
-    
-    const porDia = agruparPorDiaSemana(logs);
-    const diasComDados = porDia.filter(d => d.total > 0);
-    
-    if (diasComDados.length >= 3) {
-        const media = diasComDados.reduce((s, d) => s + d.total, 0) / diasComDados.length;
-        const piorDia = diasComDados.sort((a, b) => b.total - a.total)[0];
-        
-        if (piorDia.total > media * 1.4) {
-            const acima = ((piorDia.total / media - 1) * 100).toFixed(0);
-            resultados.push({
-                tipo: 'media',
-                icone: '📅',
-                titulo: `${piorDia.nome} é seu dia mais intenso`,
-                mensagem: `Emite ${acima}% mais que sua média diária.`,
-                sugestao: 'Tente distribuir melhor suas atividades ao longo da semana.'
-            });
-        }
+  }
+
+  for (const grupo of grupos) {
+    const duracaoMedia = grupo.duracaoTotal / grupo.contagem;
+
+    const limites = {
+      'Banho': 0.5, 'Desktop': 5, 'Gamer': 4, 'Notebook': 5,
+      'Ar-condicionado': 8, 'Secador': 0.3, 'Ferro': 0.5, 'Secadora': 1.5
+    };
+
+    const limite = Object.entries(limites).find(([k]) => grupo.nome.includes(k));
+
+    if (limite && duracaoMedia > limite[1] && grupo.contagem >= 2) {
+      resultados.push({
+        tipo: 'media',
+        icone: '⏱️',
+        titulo: `${grupo.nome}: uso prolongado`,
+        mensagem: `Média de ${duracaoMedia.toFixed(1)}h por sessão.`,
+        sugestao: `Tente reduzir para cerca de ${limite[1]}h. Pequenas pausas fazem diferença.`
+      });
+      break;
     }
-    
-    for (const grupo of grupos) {
-        const duracaoMedia = grupo.duracaoTotal / grupo.contagem;
-        
-        const limites = {
-            'Banho': 0.5, 'Desktop': 5, 'Gamer': 4, 'Notebook': 5,
-            'Ar-condicionado': 8, 'Secador': 0.3, 'Ferro': 0.5, 'Secadora': 1.5
-        };
-        
-        const limite = Object.entries(limites).find(([k]) => grupo.nome.includes(k));
-        
-        if (limite && duracaoMedia > limite[1] && grupo.contagem >= 2) {
-            resultados.push({
-                tipo: 'media',
-                icone: '⏱️',
-                titulo: `${grupo.nome}: uso prolongado`,
-                mensagem: `Média de ${duracaoMedia.toFixed(1)}h por sessão.`,
-                sugestao: `Tente reduzir para cerca de ${limite[1]}h. Pequenas pausas fazem diferença.`
-            });
-            break; 
-        }
-    }
-    
-    return resultados.slice(0, 3);
+  }
+
+  return resultados.slice(0, 3);
 }
 
 function agruparPorAtividade(logs) {
-    const grupos = {};
-    logs.forEach(log => {
-        const nome = log.activity_name;
-        if (!grupos[nome]) {
-            grupos[nome] = { nome, co2: 0, duracaoTotal: 0, contagem: 0 };
-        }
-        grupos[nome].co2 += parseFloat(log.co2_saved || 0);
-        grupos[nome].duracaoTotal += parseFloat(log.duration || 0);
-        grupos[nome].contagem++;
-    });
-    return Object.values(grupos);
+  const grupos = {};
+  logs.forEach(log => {
+    const nome = log.activity_name;
+    if (!grupos[nome]) {
+      grupos[nome] = { nome, co2: 0, duracaoTotal: 0, contagem: 0 };
+    }
+    grupos[nome].co2 += parseFloat(log.co2_saved || 0);
+    grupos[nome].duracaoTotal += parseFloat(log.duration || 0);
+    grupos[nome].contagem++;
+  });
+  return Object.values(grupos);
 }
 
 function agruparPorDiaSemana(logs) {
-    const diasSemana = ['Domingo', 'Segunda', 'Terça', 'Quarta', 'Quinta', 'Sexta', 'Sábado'];
-    const grupos = {};
-    
-    logs.forEach(log => {
-        const [dia, mes, ano] = log.date.split('/');
-        const data = new Date(ano, mes - 1, dia);
-        const nomeDia = diasSemana[data.getDay()];
-        
-        if (!grupos[nomeDia]) {
-            grupos[nomeDia] = { nome: nomeDia, total: 0, contagem: 0 };
-        }
-        grupos[nomeDia].total += parseFloat(log.co2_saved || 0);
-        grupos[nomeDia].contagem++;
-    });
-    
-    return Object.values(grupos);
+  const diasSemana = ['Domingo', 'Segunda', 'Terça', 'Quarta', 'Quinta', 'Sexta', 'Sábado'];
+  const grupos = {};
+
+  logs.forEach(log => {
+    const [dia, mes, ano] = log.date.split('/');
+    const data = new Date(ano, mes - 1, dia);
+    const nomeDia = diasSemana[data.getDay()];
+
+    if (!grupos[nomeDia]) {
+      grupos[nomeDia] = { nome: nomeDia, total: 0, contagem: 0 };
+    }
+    grupos[nomeDia].total += parseFloat(log.co2_saved || 0);
+    grupos[nomeDia].contagem++;
+  });
+
+  return Object.values(grupos);
 }
 
 function obterSugestaoAtividade(nome, porcentagem, duracaoMedia) {
-    const sugestoes = {
-        'Banho': [
-            'Cada minuto a menos economiza 0,5kg de CO₂. Um timer no celular pode ajudar! ⏱️',
-            'Temperatura morna gasta 30% menos energia e faz bem pra pele. Experimenta! 🚿',
-            'Desligar o chuveiro enquanto se ensaboa já reduz bastante o consumo. 🔄'
-        ],
-        'Desktop': [
-            'Configure o modo de economia de energia após 10 minutos parado. ⚡',
-            'Pausas a cada 2h reduzem o consumo e o cansaço visual. 👁️',
-            'Brilho da tela em 70% economiza energia e protege seus olhos. 💻'
-        ],
-        'Gamer': [
-            'Pausas a cada 2h de jogo ajudam suas costas e o planeta. 🎮',
-            'Modo economia do console reduz consumo fora dos jogos pesados. ⚙️',
-            'Intercale com atividades ao ar livre. Seu corpo agradece! 🌳'
-        ],
-        'Notebook': [
-            'Use na bateria até 20% antes de carregar. Economiza energia! 🔋',
-            'Feche abas que não está usando. Menos processamento = menos consumo. 💻'
-        ],
-        'Ar-condicionado': [
-            '23°C já é confortável e gasta bem menos. Testa aí! 🌡️',
-            'Ventilador gasta 90% menos energia. Combine os dois! 💨',
-            'Fechar portas e janelas melhora a eficiência do ar. 🚪'
-        ],
-        'Secador': [
-            'Toalha de microfibra seca o cabelo mais rápido e reduz o uso do secador. 💇',
-            'Deixe secar naturalmente até 70% e só finalize com secador. 🌬️'
-        ],
-        'Ferro': [
-            'Acumule roupas e passe tudo de uma vez. Economiza energia! 👔',
-            'Aproveite o calor residual: desligue e passe as últimas peças. 🔌'
-        ],
-        'Secadora': [
-            'Varal no sol é grátis e deixa a roupa cheirosa. ☀️',
-            'Centrifugação extra na lava e seca reduz o tempo de secadora. 🔄'
-        ],
-        'Carro': [
-            'Pneus calibrados reduzem o consumo em até 5%. 🛞',
-            'Combinar várias tarefas em uma saída reduz as emissões. 🗺️',
-            'Carona compartilhada divide o impacto (e o custo). 🤝'
-        ],
-        'Moto': [
-            'Calibrar pneus regularmente reduz o consumo de combustível. 🛞',
-            'Rotas mais curtas ou combinar trajetos ajuda a reduzir emissões. 🗺️'
-        ],
-        'Voo': [
-            'Voos diretos emitem menos que com escalas. ✈️',
-            'Compense as emissões plantando árvores após cada viagem. 🌳'
-        ],
-        'Ônibus': [
-            'Ônibus é uma ótima escolha coletiva! Continue assim. 🚌',
-            'Fora do horário de pico, o ônibus anda mais e polui menos. ⏰'
-        ]
-    };
-    
-    const categoria = Object.keys(sugestoes).find(k => nome.includes(k));
-    if (!categoria) return 'Pequenas mudanças nessa atividade podem reduzir seu impacto.';
-    
-    const lista = sugestoes[categoria];
-    const indice = Math.floor((porcentagem * duracaoMedia * 7) % lista.length);
-    return lista[indice] || lista[0];
+  const sugestoes = {
+    'Banho': [
+      'Cada minuto a menos economiza 0,5kg de CO₂. Um timer no celular pode ajudar! ⏱️',
+      'Temperatura morna gasta 30% menos energia e faz bem pra pele. Experimenta! 🚿',
+      'Desligar o chuveiro enquanto se ensaboa já reduz bastante o consumo. 🔄'
+    ],
+    'Desktop': [
+      'Configure o modo de economia de energia após 10 minutos parado. ⚡',
+      'Pausas a cada 2h reduzem o consumo e o cansaço visual. 👁️',
+      'Brilho da tela em 70% economiza energia e protege seus olhos. 💻'
+    ],
+    'Gamer': [
+      'Pausas a cada 2h de jogo ajudam suas costas e o planeta. 🎮',
+      'Modo economia do console reduz consumo fora dos jogos pesados. ⚙️',
+      'Intercale com atividades ao ar livre. Seu corpo agradece! 🌳'
+    ],
+    'Notebook': [
+      'Use na bateria até 20% antes de carregar. Economiza energia! 🔋',
+      'Feche abas que não está usando. Menos processamento = menos consumo. 💻'
+    ],
+    'Ar-condicionado': [
+      '23°C já é confortável e gasta bem menos. Testa aí! 🌡️',
+      'Ventilador gasta 90% menos energia. Combine os dois! 💨',
+      'Fechar portas e janelas melhora a eficiência do ar. 🚪'
+    ],
+    'Secador': [
+      'Toalha de microfibra seca o cabelo mais rápido e reduz o uso do secador. 💇',
+      'Deixe secar naturalmente até 70% e só finalize com secador. 🌬️'
+    ],
+    'Ferro': [
+      'Acumule roupas e passe tudo de uma vez. Economiza energia! 👔',
+      'Aproveite o calor residual: desligue e passe as últimas peças. 🔌'
+    ],
+    'Secadora': [
+      'Varal no sol é grátis e deixa a roupa cheirosa. ☀️',
+      'Centrifugação extra na lava e seca reduz o tempo de secadora. 🔄'
+    ],
+    'Carro': [
+      'Pneus calibrados reduzem o consumo em até 5%. 🛞',
+      'Combinar várias tarefas em uma saída reduz as emissões. 🗺️',
+      'Carona compartilhada divide o impacto (e o custo). 🤝'
+    ],
+    'Moto': [
+      'Calibrar pneus regularmente reduz o consumo de combustível. 🛞',
+      'Rotas mais curtas ou combinar trajetos ajuda a reduzir emissões. 🗺️'
+    ],
+    'Voo': [
+      'Voos diretos emitem menos que com escalas. ✈️',
+      'Compense as emissões plantando árvores após cada viagem. 🌳'
+    ],
+    'Ônibus': [
+      'Ônibus é uma ótima escolha coletiva! Continue assim. 🚌',
+      'Fora do horário de pico, o ônibus anda mais e polui menos. ⏰'
+    ]
+  };
+
+  const categoria = Object.keys(sugestoes).find(k => nome.includes(k));
+  if (!categoria) return 'Pequenas mudanças nessa atividade podem reduzir seu impacto.';
+
+  const lista = sugestoes[categoria];
+  const indice = Math.floor((porcentagem * duracaoMedia * 7) % lista.length);
+  return lista[indice] || lista[0];
 }
 
 function renderizarInsights(insights) {
-    const container = document.getElementById('insights-container');
-    if (!container) return;
-    
-    if (insights.length === 0) {
-        container.innerHTML = `
+  const container = document.getElementById('insights-container');
+  if (!container) return;
+
+  if (insights.length === 0) {
+    container.innerHTML = `
             <div class="insights-empty">
                 <p>🌱 Registre mais atividades para receber insights personalizados!</p>
                 <p style="font-size: 0.85rem; margin-top: 6px;">Precisamos de pelo menos 3 registros para analisar seus padrões.</p>
             </div>
         `;
-        return;
-    }
-    
-    const html = insights.map(insight => `
+    return;
+  }
+
+  const html = insights.map(insight => `
         <div class="insight-item ${insight.tipo}">
             <span class="insight-icon">${insight.icone}</span>
             <div class="insight-body">
@@ -431,8 +467,8 @@ function renderizarInsights(insights) {
             </div>
         </div>
     `).join('');
-    
-    container.innerHTML = html;
+
+  container.innerHTML = html;
 }
 
 // Executar

@@ -1,373 +1,410 @@
 <!doctype html>
 <html lang="pt-BR">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
-    <title>Usuário | UFRPEgada</title>
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
-    <link rel="icon" href="src/assets/imagens/UFRPEgada_LOGO.png" type="image/png" />
-    <link rel="stylesheet" href="src/css/global.css" />
-    <link rel="stylesheet" href="src/css/usuario.css" />
+  <title>Usuário | UFRPEgada</title>
 
-    <!-- ESTILOS EXCLUSIVOS DA BARRA DE XP E MODAL -->
-    <style>
-      /* NOVAS BADGES DE ESTATÍSTICAS */
-      .profile-stats {
-        display: flex;
-        gap: 10px;
-        margin-top: 12px;
-        flex-wrap: wrap;
-      }
-      .stat-badge {
-        background-color: #e6ebe6;
-        color: #2e5932;
-        padding: 5px 12px;
-        border-radius: 20px;
-        font-size: 0.85rem;
-        font-weight: 600;
-        display: flex;
-        align-items: center;
-        gap: 6px;
-      }
+  <link rel="icon" href="src/assets/imagens/UFRPEgada_LOGO.png" type="image/png" />
+  <link rel="stylesheet" href="src/css/global.css" />
+  <link rel="stylesheet" href="src/css/usuario.css" />
 
-      /* BARRA DE XP E ÍCONE DE INFO */
-      .profile-info-xp {
-        margin-top: 25px;
-        padding: 20px;
-        background: #f9fbf9;
-        border-radius: 10px;
-        border: 1px solid #e0e5e0;
-      }
-      .xp-header {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        margin-bottom: 12px;
-        flex-wrap: wrap;
-        gap: 10px;
-      }
-      .level-name {
-        font-weight: bold;
-        font-size: 1.15rem;
-      }
-      .info-icon-badge {
-        display: inline-flex;
-        align-items: center;
-        justify-content: center;
-        width: 22px;
-        height: 22px;
-        background-color: #e6ebe6;
-        color: #555;
-        border-radius: 50%;
-        font-size: 0.8rem;
-        margin-left: 8px;
-        cursor: pointer;
-        transition: all 0.2s;
-      }
-      .info-icon-badge:hover {
-        background-color: #d0d8d0;
-        color: #2e5932;
-        transform: scale(1.1);
-      }
-      .btn-info-xp {
-        background: none;
-        border: 1.5px solid #4CAF50;
-        color: #4CAF50;
-        padding: 5px 12px;
-        border-radius: 20px;
-        cursor: pointer;
-        font-size: 0.85rem;
-        font-weight: bold;
-        transition: all 0.2s ease;
-      }
-      .btn-info-xp:hover {
-        background: #4CAF50;
-        color: white;
-      }
-      .xp-bar-background {
-        width: 100%;
-        height: 12px;
-        background-color: #e6ebe6;
-        border-radius: 10px;
-        overflow: hidden;
-        margin-bottom: 8px;
-      }
-      .xp-bar-fill {
-        height: 100%;
-        width: 0%;
-        background: linear-gradient(90deg, #4CAF50, #8bc34a);
-        border-radius: 10px;
-        transition: width 1s ease-in-out;
-      }
-      .xp-footer {
-        display: flex;
-        justify-content: space-between;
-        font-size: 0.85rem;
-        color: #666;
-      }
-      
-      /* MODAL GENÉRICO */
-      .modal {
-        position: fixed;
-        top: 0; left: 0; width: 100%; height: 100%;
-        background: rgba(0, 0, 0, 0.5);
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        z-index: 1000;
-        opacity: 1;
-        transition: opacity 0.3s ease;
-      }
-      .modal.hidden {
-        display: none;
-        opacity: 0;
-      }
-      .modal-content {
-        background: white;
-        padding: 25px;
-        border-radius: 12px;
-        width: 90%;
-        max-width: 400px;
-        max-height: 80vh;
-        overflow-y: auto;
-        box-shadow: 0 10px 25px rgba(0,0,0,0.2);
-      }
-      .modal-header {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        border-bottom: 1px solid #eee;
-        padding-bottom: 15px;
-        margin-bottom: 15px;
-      }
-      .modal-header h2 {
-        margin: 0;
-        font-size: 1.25rem;
-        color: #2e5932;
-      }
-      .close-btn {
-        background: none;
-        border: none;
-        font-size: 1.8rem;
-        line-height: 1;
-        cursor: pointer;
-        color: #888;
-        transition: color 0.2s;
-      }
-      .close-btn:hover {
-        color: #333;
-      }
-      .xp-history-item {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        padding: 12px 0;
-        border-bottom: 1px dashed #eee;
-      }
-      .xp-history-item:last-child {
-        border-bottom: none;
-      }
-      .xp-history-details {
-        display: flex;
-        flex-direction: column;
-      }
-      .xp-history-title {
-        font-weight: bold;
-        font-size: 0.95rem;
-        color: #333;
-      }
-      .xp-history-date {
-        font-size: 0.8rem;
-        color: #777;
-        margin-top: 2px;
-      }
-      .xp-points {
-        font-weight: bold;
-        color: #4CAF50;
-        font-size: 1.05rem;
-      }
+  <!-- ESTILOS EXCLUSIVOS DA BARRA DE XP E MODAL -->
+  <style>
+    /* BARRA DE XP E ÍCONE DE INFO */
+    .profile-info-xp {
+      margin-top: 25px;
+      padding: 20px;
+      background: #f9fbf9;
+      border-radius: 10px;
+      border: 1px solid #e0e5e0;
+    }
 
-      /* ESTILOS INTERNOS DO MODAL DE REGRAS */
-      .regras-section {
-        margin-bottom: 20px;
-      }
-      .regras-section h3 {
-        font-size: 1.05rem;
-        color: #2e5932;
-        margin-bottom: 10px;
-        border-bottom: 1px solid #eee;
-        padding-bottom: 5px;
-      }
-      .regras-list {
-        list-style: none;
-        padding: 0;
-        margin: 0;
-        font-size: 0.9rem;
-        color: #444;
-      }
-      .regras-list li {
-        margin-bottom: 10px;
-        display: flex;
-        align-items: center;
-        gap: 10px;
-      }
-      .elo-badge {
-        display: inline-block;
-        padding: 4px 10px;
-        border-radius: 12px;
-        font-size: 0.8rem;
-        font-weight: bold;
-        color: white;
-        min-width: 130px;
-        text-align: center;
-      }
-    </style>
-  </head>
+    .xp-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 12px;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
 
-  <body>
-    <!-- ===== HEADER ===== -->
-    <header class="topbar">
-      <h1>UFRPEgada</h1>
-      <nav>
-        <a href="dashboard.html">Dashboard</a>
-        <a href="atividades.html">Atividades</a>
-        <button id="logout-btn">Sair</button>
-      </nav>
-    </header>
+    .level-name {
+      font-weight: bold;
+      font-size: 1.15rem;
+    }
 
-    <!-- ===== MAIN ===== -->
-    <main class="profile-container">
-      
-      <!-- ===== PERFIL ===== -->
-      <section class="profile-card">
-        <div class="profile-header">
-          <div class="avatar" id="user-avatar">J</div>
-          <div>
-            <h2 id="user-name">Carregando...</h2>
-            <p id="user-email">Carregando...</p>
-            
-            <div class="profile-stats">
-              <div class="stat-badge" title="Dias seguidos registrando">
-                🔥 <span id="user-streak">0</span> dias
-              </div>
-              <div class="stat-badge" title="Total de atividades registradas">
-                📝 <span id="user-activities">0</span> atividades
-              </div>
-              <div class="stat-badge" title="Pontuação total acumulada">
-                ⭐ <span id="user-total-score">0</span> pts
-              </div>
-            </div>
-            
-          </div>
-        </div>
+    .info-icon-badge {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 22px;
+      height: 22px;
+      background-color: #e6ebe6;
+      color: #555;
+      border-radius: 50%;
+      font-size: 0.8rem;
+      margin-left: 8px;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
 
-        <!-- ===== BARRA DE XP ===== -->
-        <div class="profile-info-xp">
-          <div class="xp-header">
-            <div style="display: flex; align-items: center;">
-              <span id="user-level-name" class="level-name">Carregando Nível...</span>
-              <span id="btn-info-regras" class="info-icon-badge" title="Como funciona o XP e os Elos?">❓</span>
-            </div>
-            <div style="display: flex; gap: 8px;">
-              <button id="btn-historico-xp" class="btn-info-xp" title="Ver Histórico de XP">
-                ℹ️ Extrato
-              </button>
-              <button id="btn-leaderboard" class="btn-info-xp" style="border-color: #FFB300; color: #FFB300;" title="Ver Ranking Global">
-                🏆 Ranking
-              </button>
-            </div>
-          </div>
-          <div class="xp-bar-background">
-            <div class="xp-bar-fill" id="xp-bar-fill"></div>
-          </div>
-          <div class="xp-footer">
-            <span id="xp-text">0 / 0 XP</span>
-            <span id="xp-hint">Calculando...</span>
-          </div>
-        </div>
-      </section>
-      
-      <!-- ===== INSIGHTS PERSONALIZADOS ===== -->
-      <section class="insights-card" id="insights-card">
-        <div class="insights-header">
-          <h2>🌱 Seus Insights</h2>
-          <span class="insights-subtitle">Análise personalizada baseada nos seus hábitos</span>
-        </div>
-        <div id="insights-container">
-          <p style="text-align:center; color:#666;">Analisando seus dados...</p>
-        </div>
-      </section>
+    .info-icon-badge:hover {
+      background-color: #d0d8d0;
+      color: #2e5932;
+      transform: scale(1.1);
+    }
 
-    </main>
+    .btn-info-xp {
+      background: none;
+      border: 1.5px solid #4CAF50;
+      color: #4CAF50;
+      padding: 5px 12px;
+      border-radius: 20px;
+      cursor: pointer;
+      font-size: 0.85rem;
+      font-weight: bold;
+      transition: all 0.2s ease;
+    }
 
-    <!-- ===== MODAL EXTRATO DE XP ===== -->
-    <div id="xp-modal" class="modal hidden">
-      <div class="modal-content">
-        <div class="modal-header">
-          <h2>Extrato de XP</h2>
-          <button id="close-modal" class="close-btn">&times;</button>
-        </div>
-        <div class="modal-body" id="xp-history-list">
-          <p style="text-align:center; color:#666;">Carregando histórico...</p>
+    .btn-info-xp:hover {
+      background: #4CAF50;
+      color: white;
+    }
+
+    .xp-bar-background {
+      width: 100%;
+      height: 12px;
+      background-color: #e6ebe6;
+      border-radius: 10px;
+      overflow: hidden;
+      margin-bottom: 8px;
+    }
+
+    .xp-bar-fill {
+      height: 100%;
+      width: 0%;
+      background: linear-gradient(90deg, #4CAF50, #8bc34a);
+      border-radius: 10px;
+      transition: width 1s ease-in-out;
+    }
+
+    .xp-footer {
+      display: flex;
+      justify-content: space-between;
+      font-size: 0.85rem;
+      color: #666;
+    }
+
+    /* MODAL GENÉRICO */
+    .modal {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.5);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      z-index: 1000;
+      opacity: 1;
+      transition: opacity 0.3s ease;
+    }
+
+    .modal.hidden {
+      display: none;
+      opacity: 0;
+    }
+
+    .modal-content {
+      background: white;
+      padding: 25px;
+      border-radius: 12px;
+      width: 90%;
+      max-width: 400px;
+      max-height: 80vh;
+      overflow-y: auto;
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+    }
+
+    .modal-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 1px solid #eee;
+      padding-bottom: 15px;
+      margin-bottom: 15px;
+    }
+
+    .modal-header h2 {
+      margin: 0;
+      font-size: 1.25rem;
+      color: #2e5932;
+    }
+
+    .close-btn {
+      background: none;
+      border: none;
+      font-size: 1.8rem;
+      line-height: 1;
+      cursor: pointer;
+      color: #888;
+      transition: color 0.2s;
+    }
+
+    .close-btn:hover {
+      color: #333;
+    }
+
+    .xp-history-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 12px 0;
+      border-bottom: 1px dashed #eee;
+    }
+
+    .xp-history-item:last-child {
+      border-bottom: none;
+    }
+
+    .xp-history-details {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .xp-history-title {
+      font-weight: bold;
+      font-size: 0.95rem;
+      color: #333;
+    }
+
+    .xp-history-date {
+      font-size: 0.8rem;
+      color: #777;
+      margin-top: 2px;
+    }
+
+    .xp-points {
+      font-weight: bold;
+      color: #4CAF50;
+      font-size: 1.05rem;
+    }
+
+    /* ESTILOS INTERNOS DO MODAL DE REGRAS */
+    .regras-section {
+      margin-bottom: 20px;
+    }
+
+    .regras-section h3 {
+      font-size: 1.05rem;
+      color: #2e5932;
+      margin-bottom: 10px;
+      border-bottom: 1px solid #eee;
+      padding-bottom: 5px;
+    }
+
+    .regras-list {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+      font-size: 0.9rem;
+      color: #444;
+    }
+
+    .regras-list li {
+      margin-bottom: 10px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .elo-badge {
+      display: inline-block;
+      padding: 4px 10px;
+      border-radius: 12px;
+      font-size: 0.8rem;
+      font-weight: bold;
+      color: white;
+      min-width: 130px;
+      text-align: center;
+    }
+  </style>
+</head>
+
+<body>
+  <!-- ===== HEADER ===== -->
+  <header class="topbar">
+    <h1>UFRPEgada</h1>
+    <nav>
+      <a href="dashboard.html">Dashboard</a>
+      <a href="atividades.html">Atividades</a>
+      <button id="logout-btn">Sair</button>
+    </nav>
+  </header>
+
+  <!-- ===== MAIN ===== -->
+  <main class="profile-container">
+
+    <!-- ===== PERFIL ===== -->
+    <section class="profile-card">
+      <div class="profile-header">
+        <div class="avatar" id="user-avatar">J</div>
+        <div>
+          <h2 id="user-name">Carregando...</h2>
+          <p id="user-email">Carregando...</p>
         </div>
       </div>
-    </div>
 
-    <!-- ===== MODAL LEADERBOARD (RANKING) ===== -->
-    <div id="leaderboard-modal" class="modal hidden">
-      <div class="modal-content">
-        <div class="modal-header">
-          <h2>🏆 Top 10 UFRPEgada</h2>
-          <button id="close-leaderboard" class="close-btn">&times;</button>
+      <!-- ===== BARRA DE XP ===== -->
+      <div class="profile-info-xp">
+        <div class="xp-header">
+          <div style="display: flex; align-items: center;">
+            <span id="user-level-name" class="level-name">Carregando Nível...</span>
+            <span id="btn-info-regras" class="info-icon-badge" title="Como funciona o XP e os Elos?">❓</span>
+          </div>
+          <div style="display: flex; gap: 8px;">
+            <button id="btn-historico-xp" class="btn-info-xp" title="Ver Histórico de XP">
+              ℹ️ Extrato
+            </button>
+          </div>
         </div>
-        <div class="modal-body" id="leaderboard-list">
-          <p style="text-align:center; color:#666;">Carregando ranking...</p>
+        <div class="xp-bar-background">
+          <div class="xp-bar-fill" id="xp-bar-fill"></div>
+        </div>
+        <div class="xp-footer">
+          <span id="xp-text">0 / 0 XP</span>
+          <span id="xp-hint">Calculando...</span>
         </div>
       </div>
-    </div>
+    </section>
 
-    <!-- ===== MODAL REGRAS E ELOS ===== -->
-    <div id="regras-modal" class="modal hidden">
-      <div class="modal-content">
-        <div class="modal-header">
-          <h2>Regras e Níveis</h2>
-          <button id="close-regras" class="close-btn">&times;</button>
-        </div>
-        <div class="modal-body">
-          
-          <div class="regras-section">
-            <h3>📈 Como ganhar pontos?</h3>
-            <ul class="regras-list" style="display: block;">
-              <li style="margin-bottom: 8px;"><span>🌿</span> <strong>+25 pts:</strong> Atividades de emissão zero (Bicicleta, Plantar, etc).</li>
-              <li><span>📝</span> <strong>+5 pts:</strong> Registro padrão de rotina.</li>
-            </ul>
-          </div>
-          
-          <div class="regras-section">
-            <h3>📉 Penalidade de Inatividade</h3>
-            <ul class="regras-list" style="display: block;">
-              <li><span>⚠️</span> <strong>-5 pts por dia:</strong> Caso fique mais de 3 dias sem registrar nada, você perde pontos a cada dia extra e zera sua Ofensiva 🔥.</li>
-            </ul>
-          </div>
+    <section class="quick-stats-grid">
 
-          <div class="regras-section">
-            <h3>🏆 Tabela de Níveis</h3>
-            <ul class="regras-list">
-              <li><span class="elo-badge" style="background-color: #9E9E9E;">Eco Iniciante</span> 0 a 99 pts</li>
-              <li><span class="elo-badge" style="background-color: #81C784;">Eco Aprendiz</span> 100 a 349 pts</li>
-              <li><span class="elo-badge" style="background-color: #4CAF50;">Eco Praticante</span> 350 a 799 pts</li>
-              <li><span class="elo-badge" style="background-color: #388E3C;">Eco Especialista</span> 800 a 1499 pts</li>
-              <li><span class="elo-badge" style="background-color: #00695C;">Eco Embaixador</span> 1500 a 2499 pts</li>
-              <li><span class="elo-badge" style="background-color: #FFB300;">Mestre Sustentável</span> 2500+ pts</li>
-            </ul>
-          </div>
+      <div class="quick-card">
+        <span class="quick-icon">🔥</span>
+        <h3>Sequência</h3>
+        <p id="user-streak-card">1</p>
+      </div>  
 
-        </div>
+      <div class="quick-card">
+        <span class="quick-icon">⭐</span>
+        <h3>Pontos</h3>
+        <p id="user-score-card">0 pts</p> 
+      </div>
+
+      <div class="quick-card">
+        <span class="quick-icon">📝</span>
+        <h3>Atividades</h3>
+        <p id="user-activities-card">0</p>
+      </div>
+
+      <div class="quick-card ranking-card">
+        <span class="quick-icon">🏆</span>
+
+        <h3>Ranking Global</h3>
+
+        <p id="user-ranking-position">
+          --
+        </p>
+
+        <small id="user-ranking-total">
+          Carregando...
+        </small>
+
+        <button id="ranking-card-btn" class="ranking-link">
+          Ver Ranking
+        </button>
+      </div>
+
+    </section>
+
+    <!-- ===== INSIGHTS PERSONALIZADOS ===== -->
+    <section class="insights-card" id="insights-card">
+      <div class="insights-header">
+        <h2>🌱 Seus Insights</h2>
+        <span class="insights-subtitle">Análise personalizada baseada nos seus hábitos</span>
+      </div>
+      <div id="insights-container">
+        <p style="text-align:center; color:#666;">Analisando seus dados...</p>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- ===== MODAL EXTRATO DE XP ===== -->
+  <div id="xp-modal" class="modal hidden">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h2>Extrato de XP</h2>
+        <button id="close-modal" class="close-btn">&times;</button>
+      </div>
+      <div class="modal-body" id="xp-history-list">
+        <p style="text-align:center; color:#666;">Carregando histórico...</p>
       </div>
     </div>
+  </div>
 
-    <!-- Script com Cache Buster v7! -->
-    <script type="module" src="./src/js/modules/usuario.js?v=7"></script>
-  </body>
+  <!-- ===== MODAL LEADERBOARD (RANKING) ===== -->
+  <div id="leaderboard-modal" class="modal hidden">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h2>🏆 Ranking Global UFRPEgada</h2>
+        <button id="close-leaderboard" class="close-btn">&times;</button>
+      </div>
+      <div class="modal-body" id="leaderboard-list">
+        <p style="text-align:center; color:#666;">Carregando ranking...</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== MODAL REGRAS E ELOS ===== -->
+  <div id="regras-modal" class="modal hidden">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h2>Regras e Níveis</h2>
+        <button id="close-regras" class="close-btn">&times;</button>
+      </div>
+      <div class="modal-body">
+
+        <div class="regras-section">
+          <h3>📈 Como ganhar pontos?</h3>
+          <ul class="regras-list" style="display: block;">
+            <li style="margin-bottom: 8px;"><span>🌿</span> <strong>+25 pts:</strong> Atividades de emissão zero
+              (Bicicleta, Plantar, etc).</li>
+            <li><span>📝</span> <strong>+5 pts:</strong> Registro padrão de rotina.</li>
+          </ul>
+        </div>
+
+        <div class="regras-section">
+          <h3>📉 Penalidade de Inatividade</h3>
+          <ul class="regras-list" style="display: block;">
+            <li><span>⚠️</span> <strong>-5 pts por dia:</strong> Caso fique mais de 3 dias sem registrar nada, você
+              perde pontos a cada dia extra e zera sua Ofensiva 🔥.</li>
+          </ul>
+        </div>
+
+        <div class="regras-section">
+          <h3>🏆 Tabela de Níveis</h3>
+          <ul class="regras-list">
+            <li><span class="elo-badge" style="background-color: #9E9E9E;">Eco Iniciante</span> 0 a 99 pts</li>
+            <li><span class="elo-badge" style="background-color: #81C784;">Eco Aprendiz</span> 100 a 349 pts</li>
+            <li><span class="elo-badge" style="background-color: #4CAF50;">Eco Praticante</span> 350 a 799 pts</li>
+            <li><span class="elo-badge" style="background-color: #388E3C;">Eco Especialista</span> 800 a 1499 pts</li>
+            <li><span class="elo-badge" style="background-color: #00695C;">Eco Embaixador</span> 1500 a 2499 pts</li>
+            <li><span class="elo-badge" style="background-color: #FFB300;">Mestre Sustentável</span> 2500+ pts</li>
+          </ul>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <!-- Script com Cache Buster v7! -->
+  <script type="module" src="./src/js/modules/usuario.js?v=7"></script>
+</body>
+
 </html>
