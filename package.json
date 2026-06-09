@@ -1,0 +1,23 @@
+{
+  "name": "ufrpegada",
+  "version": "1.0.0",
+  "description": "Um aplicativo para gestão intuitiva da sua pegada de carbono",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Zepelino/UFRPEgada.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/Zepelino/UFRPEgada/issues"
+  },
+  "homepage": "https://github.com/Zepelino/UFRPEgada#readme",
+  "devDependencies": {
+    "@playwright/test": "^1.60.0"
+  }
+}
